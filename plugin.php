@@ -6,3 +6,5 @@ Description: Development framework to create and manage custom database in Wordp
 License: Private
 Version: 0.1
  */
+
+ require_once './core/wordpress/install-plugin';
