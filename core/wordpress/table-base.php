@@ -6,9 +6,12 @@ if (!class_exists('WP_List_Table')) {
 }
 
 function mwpc_admin_notices() {
-    echo (new Div())->set_class("error")->set_content("this is my message")
-        ->add_child((new P())->add_child((new Strong())->set_content("Error")))
-        ->to_string();
+    $html = new Div([
+        new P([
+            new Strong(['content'=>'Error'])
+        ], ['content'=>': this is my message'])
+    ], ['class'=>'error']);
+    echo $html;
 }
 
 class TableBase extends WP_List_Table {
@@ -22,9 +25,8 @@ class TableBase extends WP_List_Table {
         return $item[$column_name];
     }
     public function column_cb($item) {
-        return (new Input("id[]", "checkbox"))
-                ->value($item['id'])
-                ->to_string();
+        $html = new Input(['type'=>'checkbox', 'name'=> 'id[]', 'value'=> $item['id']]);
+        return $html;
     }
     public function create_sql() {
         return $this->sql;

@@ -2,8 +2,9 @@
 require_once 'html-element.php';
 
 class Div extends HtmlElement {
-    function __construct($id="") {
-        parent::__construct($id);
+    function __construct($arg1 = array(),
+                         $arg2 = array()) {
         $this->tag = "div";
-    }
+        parent::__construct($arg1, $arg2);
+    }    
 }

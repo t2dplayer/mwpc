@@ -1,59 +1,59 @@
 <?php
-require_once WP_PLUGIN_DIR .'/mwpc/core/vality-check.php';
 
 class HtmlElement {
-    protected $arguments = array();
-    protected $child = array();
+    protected $attributes = array();
+    protected $children = array();
     protected $tag  = "";
     protected $is_self_closing = false;
     protected $content = "";
-    function __construct($id) {
-        if (!is_valid_string($id)) return $this;
-        $this->arguments['id'] = $id;
-        $args = array('class', 'title', 'style');
-        foreach ($args as &$a) {
-            $this->arguments[$a] = "";
+    protected $content_before = false;
+    function __construct($arg1 = array(),
+                         $arg2 = array()) {
+        if (sizeof($arg1) > 0) {
+            if (gettype($arg1[array_keys($arg1)[0]]) == "string") {
+                $this->attributes = $arg1;
+                $this->content_before = true;
+            } else if (gettype($arg1[array_keys($arg1)[0]]) == "object") {
+                $this->children = $arg1;
+            }
+        }
+        if (sizeof($arg2) > 0) {
+            if (gettype($arg2[array_keys($arg2)[0]]) == "string") {
+                $this->attributes = $arg2;
+            } else if (gettype($arg2[array_keys($arg2)[0]]) == "object") {
+                $this->children = $arg2;
+            }
+        }        
+        if (array_key_exists('content', $this->attributes)) {
+            $this->content = $this->attributes['content'];
         }
     }
-    public function set_class($arg) {
-        if (!is_valid_string($arg)) return $this;
-        $this->arguments['class'] = $arg;
-        return $this;
-    }
-    public function set_title($arg) {
-        if (!is_valid_string($arg)) return $this;
-        $this->arguments['title'] = $arg;
-        return $this;
-    }
-    public function set_style($arg) {
-        if (!is_valid_string($arg)) return $this;
-        $this->arguments['style'] = $arg;
-        return $this;
-    }    
-    public function add_child($child) {
-        if (!is_subclass_of($child, 'HtmlElement')) return $this;
-        array_push($this->child, $child);
-        return $this;
-    }
-    public function set_content($arg) {
-        $this->content = $arg;
-        return $this;
-    }
-    public function to_string() {
+    public function __toString() {
         $html = '<' . $this->tag;
         $i = 0;
-        $keys = array_keys($this->arguments);
-        if (sizeof($keys) > 0) $html .= " ";
-        for ($i=0; $i < sizeof($this->arguments); $i++) {
-            $html .= $keys[$i] . '="' . $this->arguments[$keys[$i]] . '"';
-            if ($i < sizeof($keys) - 1) $html .= " ";
+        $keys = array_keys($this->attributes);
+        $j = 0;
+        if (array_key_exists('content', $this->attributes)) {
+            $j = 1;
+        }
+        if (sizeof($keys) > $j) $html .= " ";
+        for ($i=0; $i < sizeof($this->attributes); $i++) {
+            if ($keys[$i] == "content") continue;
+            $html .= $keys[$i] . '="' . $this->attributes[$keys[$i]] . '"';
+            if ($i < sizeof($keys) - ($j + 1)
+                && $keys[$i] != "content") $html .= " ";
         }
         $html .= (($this->is_self_closing ? "/" : "")) . '>';
         if (!$this->is_self_closing) {
-            foreach($this->child as&$c) {
-                $html .= $c->to_string();
+            if ($this->content_before) {
+                $html .= $this->content;    
             }
-            $html .= $this->content;
+            foreach($this->children as &$c) {
+                $html .= $c;
+            }
+            if (!$this->content_before) {
+                $html .= $this->content;    
+            }
             $html .= '</' . $this->tag . '>';
         }
         return $html;
