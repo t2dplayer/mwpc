@@ -1,5 +1,4 @@
 <?php
-require_once './core/vality-check.php';
 require_once 'field.php';
 
 class Enum extends Field {

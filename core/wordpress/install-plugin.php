@@ -1,13 +1,12 @@
 <?php
-require_once './db-manager.php';
+require_once 'db-manager.php';
+require_once 'settings.php';
 
-function table_install()
+function mwpc_table_install()
 {
     global $wpdb;
-    $objects = [
-    ];
+    $objects = Settings::get_instance()->get_objects();
     foreach ($objects as $obj) {
-        $obj->create_table();
+        mwpc_create_table($obj->create_sql());
     }
 }
-register_activation_hook(__FILE__, 'table_install');

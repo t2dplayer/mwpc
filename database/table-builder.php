@@ -1,5 +1,5 @@
 <?php 
-require_once './core/vality-check.php';
+require_once WP_PLUGIN_DIR .'/mwpc/core/vality-check.php';
 
 class TableBuilder  {
     private $arguments = array();

@@ -1,28 +1,30 @@
 <?php
-require_once './core/wordpress/html-builder/check-box.php';
+require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/html-builder/input.php';
 
 if (!class_exists('WP_List_Table')) {
     require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
-function mcwp_admin_notices() {
-	echo '<div class="error"><p><strong>Error</strong>: this is my message</p></div>';
-}
+
+// function mwpc_admin_notices() {
+//     echo (new Div())->set_class("error")->set_content("this is my message")->add_child((new P())->add_child((new Strong())->set_content("Error")))->to_string();
+// }
 
 class TableBase extends WP_List_Table {
-    public function __construct($array)
-    {
+    protected $sql = "";
+    public function __construct($array) {
         global $status, $page;
-        add_action( 'mcwp_admin_notices', array( $this, 'output_errors' ) );
+        // add_action( 'mwpc_admin_notices', array( $this, 'output_errors' ) );
         parent::__construct($array);
     }
-    public function column_default($item, $column_name)
-    {
+    public function column_default($item, $column_name) {
         return $item[$column_name];
     }
-    public function column_cb($item)
-    {
-        return (new CheckBox("id[]"))
+    public function column_cb($item) {
+        return (new Input("id[]", "checkbox"))
                 ->value($item['id'])
                 ->to_string();
+    }
+    public function create_sql() {
+        return $this->sql;
     }
 }

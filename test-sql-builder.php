@@ -1,4 +1,5 @@
 <?php
+define('WP_PLUGIN_DIR', '');
 require_once "./database/header.php";
 
 // use mvwp;
