@@ -5,15 +5,17 @@ if (!class_exists('WP_List_Table')) {
     require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
-// function mwpc_admin_notices() {
-//     echo (new Div())->set_class("error")->set_content("this is my message")->add_child((new P())->add_child((new Strong())->set_content("Error")))->to_string();
-// }
+function mwpc_admin_notices() {
+    echo (new Div())->set_class("error")->set_content("this is my message")
+        ->add_child((new P())->add_child((new Strong())->set_content("Error")))
+        ->to_string();
+}
 
 class TableBase extends WP_List_Table {
     protected $sql = "";
     public function __construct($array) {
         global $status, $page;
-        // add_action( 'mwpc_admin_notices', array( $this, 'output_errors' ) );
+        add_action( 'mwpc_admin_notices', array( $this, 'output_errors' ) );
         parent::__construct($array);
     }
     public function column_default($item, $column_name) {
