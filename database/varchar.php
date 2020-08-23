@@ -1,18 +1,16 @@
 <?php
-require_once 'field.php';
+require_once 'sql-element.php';
 
-class VarChar extends Field {
-    function __construct($id, $size = 255) {
-        if (!is_valid_string($id)) return $this;
-        $this->arguments['id'] = $id;
-        $this->arguments['size'] = $size;
+class VarChar extends SQLElement {
+    function __construct($arg1 = array(),
+                         $arg2 = array()) {
+        parent::__construct($arg1, $arg2);
+        $this->instruction = "VARCHAR(";
+        if (key_exists('size', $this->attributes)) {
+            $this->instruction .= $this->attributes['size'];
+        } else {
+            $this->instruction .= '255';
+        }
+        $this->instruction .= ")";
     }
-    public function to_string() {
-        $id = $this->arguments['id'];
-        $size = $this->arguments['size'];
-        $not = $this->arguments['not'];
-        $null = $this->arguments['null'];
-        $comma = $this->arguments['comma'];
-        return "`$id` VARCHAR($size)$not$null$comma";
-    }    
 }

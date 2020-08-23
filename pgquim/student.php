@@ -8,19 +8,15 @@ class Student extends TableBase {
             'singular' => 'student',
             'plural' => 'students',
         ));
-        $builder = new TableBuilder();
         $s = Settings::get_instance();
-        $this->sql = $builder->create($s->get_database_name(), $s->get_prefix() . "student")
-                       ->add_child((new Integer('id'))->not()->null()->auto_increment()->comma())
-                       ->add_child((new Integer('user_id'))->not()->null()->comma())
-                       ->add_child((new VarChar('name'))->not()->null()->comma())
-                       ->add_child((new VarChar('cpf', 15))->not()->null()->comma())
-                       ->add_child((new VarChar('email'))->not()->null()->comma())
-                       ->add_child((new Enum('type', array('egress', 'coautor', 'graduate', 'mastering', 'phd')))->not()->null()->comma())
-                       ->add_child(new PrimaryKey('id'))
-                       ->engine("InnoDB")
-                       ->to_string();
-        // $this->prepare_items();
-        // $this->display();   
+        $this->sql = new CreateTable(SQLUtils::Make_Table('wordpress', $s->get_prefix(). 'student'), [
+            new Integer(SQLUtils::Make_PK('id')),
+            new Integer(SQLUtils::Make_NotNull('user_id')),
+            new VarChar(SQLUtils::Make_SizedNotNull('name', 255)),
+            new VarChar(SQLUtils::Make_SizedNotNull('cpf', 15)),
+            new VarChar(SQLUtils::Make_SizedNotNull('email', 255)),
+            new Enum(SQLUtils::Make_Enum('type', ['egress', 'coautor', 'graduate', 'mastering', 'phd'])),
+            new PrimaryKey(SQLUtils::Id('id')),
+        ]);
     }
 };

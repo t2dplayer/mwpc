@@ -1,14 +1,13 @@
 <?php
-require_once 'field.php';
+require_once 'sql-element.php';
 
-class PrimaryKey extends Field {
-    function __construct($id) {
-        if (!is_valid_string($id)) return $this;
-        $this->arguments['id'] = $id;
+class PrimaryKey extends SQLElement {
+    function __construct($arg1 = array(),
+                         $arg2 = array()) {
+        parent::__construct($arg1, $arg2);
+        $this->instruction = "PRIMARY KEY  (`". $this->attributes['name'] . "`)";
     }
-    public function to_string() {
-        $id = $this->arguments['id'];
-        $comma = $this->arguments['comma'];
-        return " PRIMARY KEY  (`$id`)$comma";
-    }    
+    public function __toString() {
+        return $this->instruction;
+    }
 }
