@@ -1,22 +1,25 @@
 <?php
+require_once WP_PLUGIN_DIR . '/mwpc/core/template-utils.php';
 require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/table-base.php';
-require_once WP_PLUGIN_DIR .'/mwpc/database/header.php';
 
 class Student extends TableBase {
-    function __construct() {
+    function __construct($table_name) {
         parent::__construct(array(
             'singular' => 'student',
             'plural' => 'students',
-        ));
+        ), $table_name);
+    }
+    public function make_sql() {
         $s = Settings::get_instance();
-        $this->sql = new CreateTable(SQLUtils::Make_Table('wordpress', $s->get_prefix(). 'student'), [
-            new Integer(SQLUtils::Make_PK('id')),
-            new Integer(SQLUtils::Make_NotNull('user_id')),
-            new VarChar(SQLUtils::Make_SizedNotNull('name', 255)),
-            new VarChar(SQLUtils::Make_SizedNotNull('cpf', 15)),
-            new VarChar(SQLUtils::Make_SizedNotNull('email', 255)),
-            new Enum(SQLUtils::Make_Enum('type', ['egress', 'coautor', 'graduate', 'mastering', 'phd'])),
-            new PrimaryKey(SQLUtils::Id('id')),
-        ]);
+        $sql_string = "CREATE TABLE IF NOT EXISTS `%database_name`.`%table_name` (
+            `id` INT NOT NULL AUTO_INCREMENT,
+            `user_id` INT NOT NULL,
+            `name` VARCHAR(255) NOT NULL,
+            `cpf` VARCHAR(255) NULL,
+            `email` VARCHAR(255) NULL,
+            `type` ENUM('egress', 'coautor', 'graduate', 'mastering', 'phd') NOT NULL,
+            PRIMARY KEY  (`id`))
+          ENGINE = InnoDB;";
+        $this->sql = TemplateUtils::t($sql_string, TemplateUtils::full('student'));
     }
 };

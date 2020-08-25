@@ -15,7 +15,7 @@ class Settings {
     public function get_objects() {
         return $this->objects;
     }
-    public function add_objects($array) {
+    public function add_objects($array) {        
         $this->objects = array_merge($this->objects, $array);
     }
     public function get_database_name() {
@@ -23,5 +23,8 @@ class Settings {
     }
     public function get_prefix() {
         return $this->prefix;
+    }
+    public static function L($text) {
+        return __($text, 'MWPC_DOMAIN');
     }
 }
