@@ -7,7 +7,9 @@ class Student extends TableBase {
         parent::__construct(array(
             'singular' => 'student',
             'plural' => 'students',
-        ), $table_name);
+        ), $table_name, Role::ADMIN);
+        $this->configure('Lista de Discentes e Co-autores',
+                         'Discentes, Egressos e Coautores');
     }
     public function make_sql() {
         $s = Settings::get_instance();

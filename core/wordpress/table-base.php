@@ -1,36 +1,41 @@
 <?php
-// require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/html-builder/input.php';
-require_once WP_PLUGIN_DIR .'/mwpc/core/template-utils.php';
-require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/database-utils.php';
-require_once WP_PLUGIN_DIR .'/mwpc/core/core-utils.php';
-require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/settings.php';
-
+// require_once WP_PLUGIN_DIR .'/mwpc/core/template-utils.php';
+// require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/database-utils.php';
+// require_once WP_PLUGIN_DIR .'/mwpc/core/core-utils.php';
+// require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/settings.php';
+require_once 'admin-settings.php'; 
 
 if (!class_exists('WP_List_Table')) {
     require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
-interface TableInterface {
-    public function make_sql();
+abstract class Role {
+    const ADMIN = 0;// Show in admin and user wordpress account
+    const USER = 1;// Show only in user wordpress account
 }
 
-class TableBase extends WP_List_Table implements TableInterface {
+class TableBase extends WP_List_Table {
     protected $sql = "";
     protected $table_name = "";
+    public $role = 1;
+    public $project_settings = [];  
     protected $sql_map = [
-        'bulk_delete'=>'DELETE FROM %table_name WHERE id IN(%ids);',
-        'select_count'=>'SELECT COUNT(id) FROM %table_name;',
-        'select_prepare_user'=>'SELECT * FROM %table_name ORDER BY %order_by %order LIMIT %d OFFSET %d;',
-        'select_prepare_adm'=>'SELECT * FROM %table_name WHERE user_id = %user_id ORDER BY %order_by %order LIMIT %d OFFSET %d;',
+        'bulkdelete'=>'DELETE FROM %tablename WHERE id IN(%ids);',
+        'selectcount'=>'SELECT COUNT(id) FROM %tablename;',
+        'selectprepareuser'=>'SELECT * FROM %tablename ORDER BY %orderby %order LIMIT %d OFFSET %d;',
+        'selectprepareadm'=>'SELECT * FROM %tablename WHERE user_id = %userid ORDER BY %orderby %order LIMIT %d OFFSET %d;',
     ];
     protected $html_map = [
-        'url_edit'=>'<a href="?page=%form_id&id=%item_id">%content</a>',
-        'url_delete'=>'<a href="?page=%page&action=delete&id=%item_id">%content</a>',
-        'input_checkbox'=>'<input type="checkbox" name="%id" value="%value" />',
+        'urledit'=>'<a href="?page=%formid&id=%itemid">%content</a>',
+        'urldelete'=>'<a href="?page=%page&action=delete&id=%itemid">%content</a>',
+        'inputcheckbox'=>'<input type="checkbox" name="%id" value="%value" />',
     ];
-    public function __construct($array, $table_name = "") {
+    public function __construct($array, $table_name = "", $role = Role::USER) {
         global $status, $page;
+        $this->project_settings = ProjectSettings::Make_Settings();
         $this->table_name = $table_name;
+        $this->project_settings['id'] = $this->table_name;
+        $this->role = $role;
         parent::__construct($array);
         $this->make_sql();
     }
@@ -39,16 +44,16 @@ class TableBase extends WP_List_Table implements TableInterface {
         $paged = isset($_REQUEST['paged']) ? ($per_page * max(0, intval($_REQUEST['paged']) - 1)) : 0;
         $sql_select = "";
         $data = [
-            '%table_name'=>$this->table_name,
-            '%order_by'=>(isset($_REQUEST['orderby']) && in_array($_REQUEST['orderby'], array_keys($this->get_sortable_columns()))) ? $_REQUEST['orderby'] : array_key_first($sortable),
+            '%tablename'=>$this->table_name,
+            '%orderby'=>(isset($_REQUEST['orderby']) && in_array($_REQUEST['orderby'], array_keys($this->get_sortable_columns()))) ? $_REQUEST['orderby'] : array_key_first($sortable),
             '%order'=>(isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc'))) ? $_REQUEST['order'] : 'asc'
         ];
         if (!is_admin()) {
-            $sql_select = TemplateUtils::t($this->sql_map['select_prepare_user'], $data);
+            $sql_select = TemplateUtils::t($this->sql_map['selectprepareuser'], $data);
         } else {
             $user = wp_get_current_user();
             array_merge($data, ['%user_id'=>$user->ID]);
-            $sql_select = TemplateUtils::t($this->sql_map['select_prepare_adm'], $data);
+            $sql_select = TemplateUtils::t($this->sql_map['selectprepareadm'], $data);
         }
         $this->items = $wpdb->get_results($wpdb->prepare($sql_select, $per_page, $paged), ARRAY_A);
     }
@@ -56,14 +61,14 @@ class TableBase extends WP_List_Table implements TableInterface {
     public function column_name($item)
     {
         $actions = array(
-            'edit'=>TemplateUtils::t($this->html_map['url_edit'], [
-                '%form_id'=>'form_id', 
-                '%item_id'=>$item['id'], 
+            'edit'=>TemplateUtils::t($this->html_map['urledit'], [
+                '%formid'=>$this->project_settings['formid'], 
+                '%itemid'=>$item['id'], 
                 '%content'=>Settings::L('Alterar')
             ]),
-            'delete'=>TemplateUtils::t($this->html_map['url_delete'], [
+            'delete'=>TemplateUtils::t($this->html_map['urldelete'], [
                 '%page'=>$_REQUEST['page'], 
-                '%item_id'=>$item['id'], 
+                '%itemid'=>$item['id'], 
                 '%content'=>Settings::L('Apagar')
             ]), 
         );
@@ -76,7 +81,7 @@ class TableBase extends WP_List_Table implements TableInterface {
         return $item[$column_name];
     }
     public function column_cb($item) {
-        $html = TemplateUtils::t($this->html_map['input_checkbox'], [
+        $html = TemplateUtils::t($this->html_map['inputcheckbox'], [
             '%id'=>'id[]',
             '%value'=>$item['id'],
         ]);        
@@ -92,7 +97,7 @@ class TableBase extends WP_List_Table implements TableInterface {
             $sortable,
         );
         $this->process_bulk_action();
-        $total_items = DatabaseUtils::count_items($this->sql_map['select_count'], $this->table_name);
+        $total_items = DatabaseUtils::count_items($this->sql_map['selectcount'], $this->table_name);
         $this->items = $this->get_items($per_page, $sortable);
         $this->set_pagination_args(array(
             'total_items' => $total_items,
@@ -119,8 +124,8 @@ class TableBase extends WP_List_Table implements TableInterface {
                 $ids = implode(',', $ids);
             }
             if (!empty($ids)) {
-                $sql_delete = TemplateUtils::t($this->sql_map['bulk_delete'], [
-                    '%table_name'=>$table_name, 
+                $sql_delete = TemplateUtils::t($this->sql_map['bulkdelete'], [
+                    '%tablename'=>$table_name, 
                     '%ids'=>$ids
                 ]);
                 $wpdb->query($sql_delete);
@@ -133,5 +138,9 @@ class TableBase extends WP_List_Table implements TableInterface {
     }
     public function make_sql() {
         // you must implement this in TableBase subclass
+    }
+    public function configure($title, $menu_title) {
+        $this->project_settings['title'] = $title;
+        $this->project_settings['menutitle'] = $menu_title;
     }
 }

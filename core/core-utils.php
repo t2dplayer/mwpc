@@ -1,8 +1,8 @@
 <?php
 
 class CoreUtils {
-    public static function log_error($obj) {
+    public static function log($obj) {
         $var = print_r($obj, true);
-        trigger_error($var, E_USER_ERROR);
+        trigger_error("(".$var.")", E_USER_NOTICE);
     }
 }
