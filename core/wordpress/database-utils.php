@@ -11,9 +11,9 @@ class DatabaseUtils {
         dbDelta($sql);    
     }
     public static function count_items($sql_string, $table_name) {
-        global $wpdb;
+        global $wpdb;        
         $sql_count = TemplateUtils::t($sql_string, [
-            '%table_name'=>$table_name
+            '%tablename'=>Settings::_self()->get_prefix() . $table_name
         ]);
         return $wpdb->get_var($sql_count);        
     }

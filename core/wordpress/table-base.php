@@ -35,16 +35,31 @@ class TableBase extends WP_List_Table {
         $this->project_settings = ProjectSettings::Make_Settings();
         $this->table_name = $table_name;
         $this->project_settings['id'] = $this->table_name;
+        $this->project_settings['pagehandler'] = $table_name."_page_handler";
         $this->role = $role;
         parent::__construct($array);
         $this->make_sql();
+        eval('
+        function '.$this->table_name.'_page_handler() {
+            $obj = Settings::_self()->get_object("'.$this->table_name.'");
+            create_page_handler($obj);
+        }');        
     }
     private function get_items($per_page, $sortable) {
+        if (!function_exists('array_key_first')) {
+            function array_key_first(array $arr)
+            {
+                foreach ($arr as $key => $unused) {
+                    return $key;
+                }
+                return null;
+            }
+        }        
         global $wpdb;
         $paged = isset($_REQUEST['paged']) ? ($per_page * max(0, intval($_REQUEST['paged']) - 1)) : 0;
         $sql_select = "";
         $data = [
-            '%tablename'=>$this->table_name,
+            '%tablename'=> Settings::_self()->get_prefix() . $this->table_name,
             '%orderby'=>(isset($_REQUEST['orderby']) && in_array($_REQUEST['orderby'], array_keys($this->get_sortable_columns()))) ? $_REQUEST['orderby'] : array_key_first($sortable),
             '%order'=>(isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc'))) ? $_REQUEST['order'] : 'asc'
         ];
@@ -52,7 +67,7 @@ class TableBase extends WP_List_Table {
             $sql_select = TemplateUtils::t($this->sql_map['selectprepareuser'], $data);
         } else {
             $user = wp_get_current_user();
-            array_merge($data, ['%user_id'=>$user->ID]);
+            $data['%userid']=$user->ID;
             $sql_select = TemplateUtils::t($this->sql_map['selectprepareadm'], $data);
         }
         $this->items = $wpdb->get_results($wpdb->prepare($sql_select, $per_page, $paged), ARRAY_A);
@@ -105,6 +120,14 @@ class TableBase extends WP_List_Table {
             'total_pages' => ceil($total_items / $per_page), // calculate pages count
         ));
     }
+    public function get_columns()
+    {
+        $columns = array(
+            'cb' => '<input type="checkbox" />', 
+            'id' => 'id',
+        );
+        return $columns;
+    }    
     // Bulk Actions
     public function get_bulk_actions()
     {
@@ -116,8 +139,8 @@ class TableBase extends WP_List_Table {
     public function process_bulk_action()
     {
         global $wpdb;
-        $s = Settings::get_instance();
-        $table_name = $s->prefix . $this->table_name;
+        $s = Settings::_self();
+        $table_name = Settings::_self()->get_prefix() . $this->table_name;
         if ('delete' === $this->current_action()) {
             $ids = isset($_REQUEST['id']) ? $_REQUEST['id'] : array();
             if (is_array($ids)) {
@@ -131,6 +154,11 @@ class TableBase extends WP_List_Table {
                 $wpdb->query($sql_delete);
             }
         }
+    }
+    public function get_sortable_columns() {
+        return [
+            'id'=>'id'
+        ];
     }
     // Not related with wordpress
     public function get_create_sql() {

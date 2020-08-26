@@ -7,8 +7,8 @@ class TemplateUtils {
     }
     public static function full($table_name) {
         return [
-            '%database_name'=>Settings::get_instance()->get_database_name(),
-            '%table_name'=>Settings::get_instance()->get_prefix() . $table_name,
+            '%databasename'=>Settings::_self()->get_database_name(),
+            '%tablename'=>Settings::_self()->get_prefix() . $table_name,
         ];
     }
 };

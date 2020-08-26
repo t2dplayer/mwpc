@@ -21,7 +21,7 @@ function mwpc_make_menu($settings) {
         $settings['id'],
         $settings['pagehandler']
     );
-    $add_new = Settings::get_instance()->L('Adicionar novo registro');
+    $add_new = Settings::_self()->L('Adicionar novo registro');
     add_submenu_page(
         $settings['id'],
         $add_new,
@@ -33,14 +33,14 @@ function mwpc_make_menu($settings) {
 }
 
 function mwpc_make_admin_menu_items($objects) {
-    foreach ($objects as $obj) {    
+    foreach ($objects as $key=>$obj) {    
         if ($obj->role != Role::ADMIN) continue;
         mwpc_make_menu($obj->project_settings);
     }
 }
 
 function mwpc_make_menu_items($objects) {
-    foreach ($objects as $obj) {
+    foreach ($objects as $key=>$obj) {
         if ($obj->role == Role::ADMIN) continue;
         mwpc_make_menu($obj->project_settings);
     }  

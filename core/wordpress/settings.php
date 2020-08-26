@@ -8,15 +8,18 @@ class Settings {
     private $objects = array();
     private $database_name = "wordpress";
     private $prefix = "mwpc_";
-    public static function get_instance() {
+    public static function _self() {
         if (self::$instance == null) self::$instance = new self;
         return self::$instance;
     }
+    public function get_object($key) {
+        return $this->objects[$key];
+    }
     public function get_objects() {
         return $this->objects;
-    }
-    public function add_objects($array) {        
-        $this->objects = array_merge($this->objects, $array);
+    }    
+    public function add_object($key, $object) {
+        $this->objects[$key] = $object;
     }
     public function get_database_name() {
         return $this->database_name;
