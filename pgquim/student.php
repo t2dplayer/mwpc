@@ -12,18 +12,20 @@ class Student extends TableBase {
         ), $table_name, Role::ADMIN);
         $this->configure('Lista de Discentes e Co-autores',
                          'Discentes, Egressos e Coautores');
-        $this->fields = ['user_id', 'name', 'cpf', 'email', 'type'];
+        $this->fields = ['id', 'user_id', 'name', 'cpf', 'email', 'type'];
         $this->labels = [
+            'Código',
             MWPCLocale::get('teacher'),
             MWPCLocale::get('name'),
             MWPCLocale::get('cpf'),
             MWPCLocale::get('email'),
             MWPCLocale::get('type'),
-        ];        
+        ];
+        $this->is_sortable = [false, false, true, false, false, true];     
     }
     public function make_sql() {
         $s = Settings::_self();
-        $sql_string = "CREATE TABLE IF NOT EXISTS `%database_name`.`%table_name` (
+        $sql_string = "CREATE TABLE IF NOT EXISTS %table (
             `id` INT NOT NULL AUTO_INCREMENT,
             `user_id` INT NOT NULL,
             `name` VARCHAR(255) NOT NULL,
@@ -32,6 +34,8 @@ class Student extends TableBase {
             `type` ENUM('egress', 'coautor', 'graduate', 'mastering', 'phd') NOT NULL,
             PRIMARY KEY  (`id`))
           ENGINE = InnoDB;";
-        $this->sql = TemplateUtils::t($sql_string, TemplateUtils::full('student'));
+        $this->sql =  TemplateUtils::t($sql_string, [
+            '%table'=>SQLTemplates::full_table_name($this->table_name),
+        ]);
     }
 };

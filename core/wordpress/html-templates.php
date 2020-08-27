@@ -14,6 +14,9 @@ class HTMLTemplates {
             'div_message'=>file_get_contents($path . 'div-message.php'),
             'page_header'=>file_get_contents($path . 'page-header.php'),
             'page_footer'=>file_get_contents($path . 'page-footer.php'),
+            'edit_link'=>file_get_contents($path . 'edit-link.php'),
+            'delete_link'=>file_get_contents($path . 'delete-link.php'),
+            'input_checkbox'=>file_get_contents($path . 'input-checkbox.php'),
         ];
     }
     public function get($key, $data=array()) {

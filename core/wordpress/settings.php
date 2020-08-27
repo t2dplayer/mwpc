@@ -31,6 +31,6 @@ class Settings {
         return __($text, 'MWPC_DOMAIN');
     }
     public function table_name($table_name) {
-        return "`$this->database_name`.`$table_name`";
+        return "`$this->database_name`.`$this->prefix$table_name`";
     }
 }

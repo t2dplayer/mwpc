@@ -10,12 +10,12 @@ class DatabaseUtils {
         global $wpdb;
         dbDelta($sql);    
     }
-    public static function count_items($sql_string, $table_name) {
-        global $wpdb;        
-        $sql_count = TemplateUtils::t($sql_string, [
-            '%tablename'=>Settings::_self()->get_prefix() . $table_name
+    public static function count_items($table_name) {
+        global $wpdb;
+        $sql_count = SQLTemplates::get('select_count', [
+            '%tablename'=>Settings::_self()->table_name($table_name)
         ]);
-        return $wpdb->get_var($sql_count);        
+        return $wpdb->get_var($sql_count);
     }
 }
 

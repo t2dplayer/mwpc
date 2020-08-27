@@ -1,0 +1,1 @@
+<a href="?page=%formid&id=%itemid">%content</a>
