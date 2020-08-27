@@ -30,4 +30,7 @@ class Settings {
     public static function L($text) {
         return __($text, 'MWPC_DOMAIN');
     }
+    public function table_name($table_name) {
+        return "`$this->database_name`.`$table_name`";
+    }
 }

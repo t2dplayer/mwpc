@@ -2,7 +2,7 @@
 require_once 'html-templates.php';
 require_once 'url-utils.php';
 
-function create_page_handler($table)
+function create_page_handler(&$table)
 {
     global $wpdb;
     $table->prepare_items();

@@ -19,6 +19,8 @@ class TableBase extends WP_List_Table {
     protected $table_name = "";
     public $role = 1;
     public $project_settings = [];  
+    protected $fields = [];
+    protected $labels = [];
     protected $sql_map = [
         'bulkdelete'=>'DELETE FROM %tablename WHERE id IN(%ids);',
         'selectcount'=>'SELECT COUNT(id) FROM %tablename;',
@@ -122,10 +124,8 @@ class TableBase extends WP_List_Table {
     }
     public function get_columns()
     {
-        $columns = array(
-            'cb' => '<input type="checkbox" />', 
-            'id' => 'id',
-        );
+        $columns = array_combine($this->fields, $this->labels);
+        $columns['cb'] = '<input type="checkbox" />';
         return $columns;
     }    
     // Bulk Actions
@@ -170,5 +170,8 @@ class TableBase extends WP_List_Table {
     public function configure($title, $menu_title) {
         $this->project_settings['title'] = $title;
         $this->project_settings['menutitle'] = $menu_title;
+    }
+    public function get_fields() {
+        return $this->fields;
     }
 }

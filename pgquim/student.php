@@ -12,6 +12,14 @@ class Student extends TableBase {
         ), $table_name, Role::ADMIN);
         $this->configure('Lista de Discentes e Co-autores',
                          'Discentes, Egressos e Coautores');
+        $this->fields = ['user_id', 'name', 'cpf', 'email', 'type'];
+        $this->labels = [
+            MWPCLocale::get('teacher'),
+            MWPCLocale::get('name'),
+            MWPCLocale::get('cpf'),
+            MWPCLocale::get('email'),
+            MWPCLocale::get('type'),
+        ];        
     }
     public function make_sql() {
         $s = Settings::_self();
@@ -25,17 +33,5 @@ class Student extends TableBase {
             PRIMARY KEY  (`id`))
           ENGINE = InnoDB;";
         $this->sql = TemplateUtils::t($sql_string, TemplateUtils::full('student'));
-    }
-    public function get_columns()
-    {
-        $columns = array(
-            'cb' => '<input type="checkbox" />', 
-            'user_id' => MWPCLocale::get('teacher'),
-            'name' => MWPCLocale::get('name'),
-            'cpf' => MWPCLocale::get('cpf'),
-            'email' => MWPCLocale::get('email'),
-            'type' => MWPCLocale::get('type'),
-        );
-        return $columns;
     }
 };
