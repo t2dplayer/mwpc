@@ -10,14 +10,28 @@ class HTMLTemplates {
     protected $html_map = [];
     function __construct() {
         $path = WP_PLUGIN_DIR .'/mwpc/core/wordpress/html-templates/';
-        $this->html_map = [
-            'div_message'=>file_get_contents($path . 'div-message.php'),
-            'page_header'=>file_get_contents($path . 'page-header.php'),
-            'page_footer'=>file_get_contents($path . 'page-footer.php'),
-            'edit_link'=>file_get_contents($path . 'edit-link.php'),
-            'delete_link'=>file_get_contents($path . 'delete-link.php'),
-            'input_checkbox'=>file_get_contents($path . 'input-checkbox.php'),
+        $keys = [
+            'add_new',
+            'delete_link',
+            'div_message',
+            'edit_link',
+            'form_handler_footer',
+            'form_handler_header',
+            'input_checkbox',
+            'message',
+            'notice',
+            'page_footer',
+            'page_header',
         ];
+        foreach($keys as $k) {
+            $filename = str_replace("_", "-", $k) . ".php";
+            $this->html_map[$k] = file_get_contents($path . $filename); 
+        }
+        foreach([
+            'input'=>'form-fields/input',
+        ] as $key=>$value) {
+            $this->html_map[$key] = file_get_contents($path . $value . ".php"); 
+        }
     }
     public function get($key, $data=array()) {
         if (!array_key_exists($key, $this->html_map)) CoreUtils::log("Invalid key -> ". $key);

@@ -21,7 +21,7 @@ function mwpc_make_menu($settings) {
         $settings['id'],
         $settings['pagehandler']
     );
-    $add_new = Settings::_self()->L('Adicionar novo registro');
+    $add_new = MWPCLocale::get('add_new');
     add_submenu_page(
         $settings['id'],
         $add_new,

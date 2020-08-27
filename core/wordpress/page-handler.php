@@ -15,7 +15,7 @@ function create_page_handler(&$table)
     echo HTMLTemplates::_self()->get('page_header', [
         '%id'=>$table->project_settings['id'],
         '%title'=>$table->project_settings['title'],
-        '%link'=>URLUtils::URLPage($table->project_settings['id']),
+        '%link'=>URLUtils::URLForm($table->project_settings['id']),
         '%addnew'=>MWPCLocale::get('add_new'),
         '%message'=>$message,
         '%requestpage'=>$_REQUEST['page'],

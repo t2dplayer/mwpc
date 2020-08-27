@@ -22,7 +22,9 @@ class TableBase extends WP_List_Table {
     public $project_settings = [];  
     protected $fields = [];
     protected $labels = [];
+    protected $defaults = [];
     protected $is_sortable = [];
+    protected $fields_types = [];
     public function __construct($array, $table_name = "", $role = Role::USER) {
         global $status, $page;
         $this->project_settings = ProjectSettings::Make_Settings();
@@ -32,12 +34,25 @@ class TableBase extends WP_List_Table {
         $this->role = $role;
         parent::__construct($array);
         $this->make_sql();
-        $function = '
-        function '.$this->table_name.'_page_handler() {
-            $obj = Settings::_self()->get_object("'.$this->table_name.'");
-            create_page_handler($obj);
+        $this->make_handlers();
+    }
+    private function make_handlers() {
+        $_str = '
+        function %id%name() {
+            $obj = Settings::_self()->get_object("%id");
+            %lambda($obj);
         }';
-        eval($function);
+        foreach([
+            ['_page_handler', 'create_page_handler'], 
+            ['_form_handler', 'create_form_handler']
+        ] as $arr) {
+            $function = TemplateUtils::t($_str, [
+                '%id'=>$this->table_name,
+                '%name'=>$arr[0],
+                '%lambda'=>$arr[1]
+            ]);
+            eval($function);
+        }
     }
     private function get_items($per_page, $sortable) {
         if (!function_exists('array_key_first')) {
@@ -175,5 +190,28 @@ class TableBase extends WP_List_Table {
     }
     public function get_fields() {
         return $this->fields;
+    }
+    public function get_form_fields() {
+        if (sizeof($this->fields) != sizeof($this->fields_types)) {
+            throw new Exception("Invalid size of fields and fields_types");
+        }
+        $columns = [];
+        for($i = 0; $i < sizeof($this->fields); $i++) {
+            if(empty($this->fields_types[$i])) continue;
+            $f = &$this->fields[$i];
+            $columns[$f] = $this->fields_types[$i];
+        }
+        return $columns;
+    }
+    public function get_defaults() {
+        if (sizeof($this->fields) != sizeof($this->defaults)) {
+            throw new Exception("Invalid size of fields and defaults");
+        }
+        $columns = [];
+        for($i = 0; $i < sizeof($this->fields); $i++) {
+            $f = &$this->fields[$i];
+            $columns[$f] = $this->defaults[$i];
+        }
+        return $columns;
     }
 }

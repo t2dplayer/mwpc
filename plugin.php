@@ -9,6 +9,7 @@ Version: 0.1
 require_once 'core/wordpress/settings.php';
 require_once 'core/wordpress/install-plugin.php';
 require_once 'core/wordpress/page-handler.php';
+require_once 'core/wordpress/form-handler.php';
 
 
 /* you must put your project header here */

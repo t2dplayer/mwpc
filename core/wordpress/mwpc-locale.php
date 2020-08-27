@@ -9,6 +9,9 @@ class MWPCLocale {
         'cpf'=>'CPF',
         'email'=>'E-mail',
         'type'=>'Tipo',
+        'id'=>'Código',
+        'back'=>'Voltar',
+        'save'=>'Salvar',
     ];
     public static function get($key) {
         if (!array_key_exists($key, MWPCLocale::$message_map)) CoreUtils::log("Invalid key -> ". $key);

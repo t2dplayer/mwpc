@@ -1,8 +1,14 @@
 <?php
-require_once WP_PLUGIN_DIR . '/mwpc/core/template-utils.php';
-require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/table-base.php';
-require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/page-handler.php';
-require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/mwpc-locale.php';
+$files = [
+    'template-utils.php',
+    'wordpress/table-base.php',
+    'wordpress/page-handler.php',
+    'wordpress/mwpc-locale.php',
+    'wordpress/form-utils.php',
+];
+foreach($files as $f) {
+    require_once WP_PLUGIN_DIR . '/mwpc/core/' . $f;
+}
 
 class Student extends TableBase {
     function __construct($table_name) {
@@ -13,15 +19,24 @@ class Student extends TableBase {
         $this->configure('Lista de Discentes e Co-autores',
                          'Discentes, Egressos e Coautores');
         $this->fields = ['id', 'user_id', 'name', 'cpf', 'email', 'type'];
+        $this->defaults = [0, get_current_user_id(), '', '', '', 'graduate'];
+        $this->fields_types = [
+            '',
+            '',
+            FormUtils::Input('text', 'Digite o nome do aluno'),
+            FormUtils::Input('text', 'Digite o CPF do aluno'),
+            FormUtils::Input('email', 'Digite o nome E-mail do aluno'),
+            ''
+        ];
         $this->labels = [
-            'Código',
+            MWPCLocale::get('id'),
             MWPCLocale::get('teacher'),
             MWPCLocale::get('name'),
             MWPCLocale::get('cpf'),
             MWPCLocale::get('email'),
             MWPCLocale::get('type'),
         ];
-        $this->is_sortable = [false, false, true, false, false, true];     
+        $this->is_sortable = [false, false, true, false, false, true];
     }
     public function make_sql() {
         $s = Settings::_self();

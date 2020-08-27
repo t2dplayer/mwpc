@@ -1,3 +1,13 @@
+<!--
+$data  = [
+    '%title'=>'',
+    '%link'=>'',
+    '%addnew'=>'',
+    '%message'=>'',
+    '%id'=>'',
+    '%requestpage'=>'', 
+];
+-->
 <div class="wrap">
     <div class="icon32 icon32-posts-post" id="icon-edit">
         <br />
