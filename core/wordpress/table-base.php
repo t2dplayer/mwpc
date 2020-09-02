@@ -30,7 +30,9 @@ class TableBase extends WP_List_Table {
         $this->project_settings = ProjectSettings::Make_Settings();
         $this->table_name = $table_name;
         $this->project_settings['id'] = $this->table_name;
-        $this->project_settings['pagehandler'] = $table_name."_page_handler";
+        $this->project_settings['page_handler'] = $table_name . "_page_handler";
+        $this->project_settings['meta_box_id'] = $table_name . "_meta_box_id";
+        $this->project_settings['meta_box_handler'] = $table_name . "_meta_box_handler";
         $this->role = $role;
         parent::__construct($array);
         $this->make_sql();
@@ -38,19 +40,23 @@ class TableBase extends WP_List_Table {
     }
     private function make_handlers() {
         $_str = '
-        function %id%name() {
+        function %id%name(%item) {
             $obj = Settings::_self()->get_object("%id");
-            %lambda($obj);
+            %lambda($obj%comma);
         }';
         foreach([
-            ['_page_handler', 'create_page_handler'], 
-            ['_form_handler', 'create_form_handler']
+            ['_page_handler', 'create_page_handler', ''], 
+            ['_form_handler', 'create_form_handler', ''],
+            ['_meta_box_handler', 'create_meta_box_handler', '$item'],
         ] as $arr) {
             $function = TemplateUtils::t($_str, [
                 '%id'=>$this->table_name,
                 '%name'=>$arr[0],
-                '%lambda'=>$arr[1]
+                '%lambda'=>$arr[1],
+                '%item'=>$arr[2],
+                '%comma'=>($arr[2] != '') ? ", $arr[2]" : "",
             ]);
+            //CoreUtils::log($function);
             eval($function);
         }
     }
@@ -186,7 +192,7 @@ class TableBase extends WP_List_Table {
     }
     public function configure($title, $menu_title) {
         $this->project_settings['title'] = $title;
-        $this->project_settings['menutitle'] = $menu_title;
+        $this->project_settings['menu_title'] = $menu_title;
     }
     public function get_fields() {
         return $this->fields;

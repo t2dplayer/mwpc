@@ -22,15 +22,20 @@ class HTMLTemplates {
             'notice',
             'page_footer',
             'page_header',
+            'table_header',
+            'table_tr',
+            'table_footer',
         ];
         foreach($keys as $k) {
             $filename = str_replace("_", "-", $k) . ".php";
             $this->html_map[$k] = file_get_contents($path . $filename); 
         }
         foreach([
-            'input'=>'form-fields/input',
+            'input'=>'input',
+            'select'=>'select',
+            'option'=>'option',
         ] as $key=>$value) {
-            $this->html_map[$key] = file_get_contents($path . $value . ".php"); 
+            $this->html_map[$key] = file_get_contents($path . 'form-fields/' . $value . ".php"); 
         }
     }
     public function get($key, $data=array()) {

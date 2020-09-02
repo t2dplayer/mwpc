@@ -5,8 +5,8 @@ class ProjectSettings {
         return [
             'id'=>'',
             'title'=>'',
-            'menutitle'=>'',
-            'pagehandler'=>'',
+            'menu_title'=>'',
+            'page_handler'=>'',
         ];
     }
 };

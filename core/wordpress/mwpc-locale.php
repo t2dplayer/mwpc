@@ -12,6 +12,11 @@ class MWPCLocale {
         'id'=>'Código',
         'back'=>'Voltar',
         'save'=>'Salvar',
+        'egress'=>'Egresso',
+        'coautor'=>'Co-Autor',
+        'graduate'=>'Graduação',
+        'mastering'=>'Mestrado',
+        'phd'=>'Doutorado',
     ];
     public static function get($key) {
         if (!array_key_exists($key, MWPCLocale::$message_map)) CoreUtils::log("Invalid key -> ". $key);

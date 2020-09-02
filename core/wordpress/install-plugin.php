@@ -16,10 +16,10 @@ function mwpc_make_menu($settings) {
     $capability = "activate_plugins";
     add_menu_page(
         $settings['title'],
-        $settings['menutitle'],
+        $settings['menu_title'],
         $capability,
         $settings['id'],
-        $settings['pagehandler']
+        $settings['page_handler']
     );
     $add_new = MWPCLocale::get('add_new');
     add_submenu_page(

@@ -10,6 +10,7 @@ require_once 'core/wordpress/settings.php';
 require_once 'core/wordpress/install-plugin.php';
 require_once 'core/wordpress/page-handler.php';
 require_once 'core/wordpress/form-handler.php';
+require_once 'core/wordpress/meta-box-handler.php';
 
 
 /* you must put your project header here */
@@ -17,6 +18,7 @@ function your_project_objects() {
     require_once 'pgquim/header.php';
     Settings::_self()->add_object('student', new Student('student'));
 }
+
 
 /* Now we need to create the menu items */
 function admin_menu_install()

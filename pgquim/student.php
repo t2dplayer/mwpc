@@ -26,7 +26,14 @@ class Student extends TableBase {
             FormUtils::Input('text', 'Digite o nome do aluno'),
             FormUtils::Input('text', 'Digite o CPF do aluno'),
             FormUtils::Input('email', 'Digite o nome E-mail do aluno'),
-            ''
+            FormUtils::Select([
+                'egress'=>MWPCLocale::get('egress'), 
+                'coautor'=>MWPCLocale::get('coautor'), 
+                'graduate'=>MWPCLocale::get('graduate'), 
+                'mastering'=>MWPCLocale::get('mastering'), 
+                'phd'=>MWPCLocale::get('phd'), 
+                ]
+            ),
         ];
         $this->labels = [
             MWPCLocale::get('id'),
