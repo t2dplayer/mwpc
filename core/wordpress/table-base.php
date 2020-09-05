@@ -30,6 +30,7 @@ class TableBase extends WP_List_Table {
         $this->project_settings = ProjectSettings::Make_Settings();
         $this->table_name = $table_name;
         $this->project_settings['id'] = $this->table_name;
+        $this->project_settings['form_id'] = $table_name . "_form_id";
         $this->project_settings['page_handler'] = $table_name . "_page_handler";
         $this->project_settings['meta_box_id'] = $table_name . "_meta_box_id";
         $this->project_settings['meta_box_handler'] = $table_name . "_meta_box_handler";
@@ -85,14 +86,15 @@ class TableBase extends WP_List_Table {
             $data['%userid']=$user->ID;
             $sql_select = SQLTemplates::get('select_prepare_adm', $data);
         }
-        $this->items = $wpdb->get_results($wpdb->prepare($sql_select, $per_page, $paged), ARRAY_A);
+        $prepared_sql = $wpdb->prepare($sql_select, $per_page, $paged);
+        return $wpdb->get_results($prepared_sql, ARRAY_A);
     }
     // Required Methods
     public function column_name($item)
     {
         $actions = array(
             'edit'=>HTMLTemplates::_self()->get('edit_link', [
-                '%formid'=>$this->project_settings['formid'], 
+                '%formid'=>$this->project_settings['form_id'], 
                 '%itemid'=>$item['id'], 
                 '%content'=>Settings::L('Alterar')
             ]),
@@ -175,7 +177,7 @@ class TableBase extends WP_List_Table {
                 $ids = implode(',', $ids);
             }
             if (!empty($ids)) {
-                $sql_delete = SQLTemplates::get('bulkdelete', [
+                $sql_delete = SQLTemplates::get('bulk_delete', [
                     '%tablename'=>$table_name, 
                     '%ids'=>$ids
                 ]);
@@ -183,6 +185,14 @@ class TableBase extends WP_List_Table {
             }
         }
     }
+    public function column_user_id($item) {
+        global $wpdb;
+        $sql = SQLTemplates::_self()->get('select_where_id', [
+            '%tablename'=> 'wp_users',
+        ]);
+        $items = $wpdb->get_row($wpdb->prepare($sql, $item['user_id']), ARRAY_A);
+        return '<em>' . $items['display_name'] . '</em>';
+    }      
     // Not related with wordpress
     public function get_create_sql() {
         return $this->sql;
@@ -219,5 +229,8 @@ class TableBase extends WP_List_Table {
             $columns[$f] = $this->defaults[$i];
         }
         return $columns;
+    }
+    public function validate($item) {
+        return true;
     }
 }

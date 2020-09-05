@@ -1,14 +1,3 @@
-<!--
-    $data  = [
-        '%title'=>'', 
-        '%link'=>'',
-        '%back'=>'',
-        '%notice'=>'',
-        '%message'=>'',
-        '%nonce'=>'',
-        '%id'=>'',
-    ]; 
--->
 <div class="wrap">
     <div class="icon32 icon32-posts-post" id="icon-edit">
         <br />

@@ -8,19 +8,24 @@ class FormUtils {
             '%size'=>$size,
             '%required'=>$required,
         ]);
-        return $html;
+        return ['html'=>$html, 'f'=>null];
     }
     public static function Select($options=array()) {
-        $options_html = "";
-        foreach($options as $value=>$label) {
-            $options_html .= HTMLTemplates::_self()->get('option', [
-                '%value'=>$value,
-                '%label'=>$label,
+        $html = HTMLTemplates::_self()->get('select');
+        $f = function($html, $selected, $options) {
+            $options_html = "";
+            foreach($options as $value=>$label) {
+                $options_html .= HTMLTemplates::_self()->get('option', [
+                    '%value'=>$value,
+                    '%label'=>$label,
+                    '%selected'=>($selected == $value) ? "selected" : "",
+                ]);
+            }
+            $html = HTMLTemplates::_self()->get('select', [
+                '%options'=>$options_html,
             ]);
-        }
-        $html = HTMLTemplates::_self()->get('select', [
-            '%options'=>$options_html,
-        ]);
-        return $html;
+            return $html;
+        };
+        return ['html'=>$html, 'options'=>$options, 'f'=>$f];
     }    
 };

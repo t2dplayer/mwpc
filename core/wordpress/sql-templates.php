@@ -12,6 +12,7 @@ class SQLTemplates {
         'select_count'=>'SELECT COUNT(id) FROM %tablename;',
         'select_prepare_user'=>'SELECT * FROM %tablename ORDER BY %orderby %order LIMIT %d OFFSET %d;',
         'select_prepare_adm'=>'SELECT * FROM %tablename WHERE user_id = %userid ORDER BY %orderby %order LIMIT %d OFFSET %d;',
+        'select_where_id'=>'SELECT * FROM %tablename WHERE id = %d;',
         'full_table_name'=>'`%database`.`table`',
     ];
     public static function get($key, $data=array()) {

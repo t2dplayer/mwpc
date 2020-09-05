@@ -17,6 +17,7 @@ class MWPCLocale {
         'graduate'=>'Graduação',
         'mastering'=>'Mestrado',
         'phd'=>'Doutorado',
+        'save_changes'=>'Salvar alterações',
     ];
     public static function get($key) {
         if (!array_key_exists($key, MWPCLocale::$message_map)) CoreUtils::log("Invalid key -> ". $key);

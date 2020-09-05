@@ -23,9 +23,9 @@ class Student extends TableBase {
         $this->fields_types = [
             '',
             '',
-            FormUtils::Input('text', 'Digite o nome do aluno'),
-            FormUtils::Input('text', 'Digite o CPF do aluno'),
-            FormUtils::Input('email', 'Digite o nome E-mail do aluno'),
+            FormUtils::Input('text', 'Digite o nome aqui'),
+            FormUtils::Input('text', 'Digite um CPF válido aqui'),
+            FormUtils::Input('email', 'Digite um E-mail válido aqui'),
             FormUtils::Select([
                 'egress'=>MWPCLocale::get('egress'), 
                 'coautor'=>MWPCLocale::get('coautor'), 
