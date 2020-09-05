@@ -52,12 +52,16 @@ function notice(&$sql_command, &$sql_status) {
         $result .= "localizar ";
     }
     $result .= "o registro.";
-    return $result;
+    return HTMLTemplates::_self()->get('div_message', [
+        '%content'=>$result,
+    ]);
 }
 
 function message(&$sql_command, &$sql_status) {
     if ($sql_status == Status::Error
-        || $sql_status == Status::None) return '';
+        || $sql_status == Status::None) {            
+            return '';
+    }
     $result = "Registro  ";
     if ($sql_command == SQLCommand::Insert) {
         $result .= "salvo";
@@ -66,8 +70,11 @@ function message(&$sql_command, &$sql_status) {
     } else if ($sql_command == SQLCommand::Delete) {
         $result .= "apagado ";
     }
-    $result .= " com sucesso.";
-    return $result;
+    $result .= " com sucesso.";    
+    $html = HTMLTemplates::_self()->get('div_message', [
+        '%content'=>$result,
+    ]);
+    return $html;
 }
 
 function save(&$table, &$table_name, &$item) {
@@ -113,7 +120,6 @@ function create_form_handler(&$table) {
     global $wpdb;
     $table_name = Settings::_self()->get_prefix() . $table->project_settings['id'];
     $item = [];
-    CoreUtils::log($_REQUEST);
     if (isset($_REQUEST['nonce']) 
     && wp_verify_nonce($_REQUEST['nonce'], basename(__FILE__))) {  
         $result = save($table, $table_name, $item);
@@ -128,13 +134,13 @@ function create_form_handler(&$table) {
         $table->project_settings['id'],
         'normal',
         'default'
-    );    
+    );
     echo HTMLTemplates::_self()->get('form_handler_header', [
         '%title'=>$table->project_settings['title'], 
         '%link'=>URLUtils::URLPage($table->project_settings['id']),
         '%back'=>MWPCLocale::get('back'),
         '%notice'=>notice($result->sql_command, $result->status),
-        '%message'=>message($result->sql_command, $status),
+        '%message'=>message($result->sql_command, $result->status),
         '%nonce'=>wp_create_nonce(basename(__FILE__)),
         '%id'=>isset($_REQUEST['id']) ? $_REQUEST['id'] : '',
     ]);

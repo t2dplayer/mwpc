@@ -57,7 +57,6 @@ class TableBase extends WP_List_Table {
                 '%item'=>$arr[2],
                 '%comma'=>($arr[2] != '') ? ", $arr[2]" : "",
             ]);
-            //CoreUtils::log($function);
             eval($function);
         }
     }
