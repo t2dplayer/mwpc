@@ -60,4 +60,16 @@ class Student extends TableBase {
             '%table'=>SQLTemplates::full_table_name($this->table_name),
         ]);
     }
+    public function validate($item) {
+        return [
+            [
+                'result'=>CoreUtils::validate_cpf($item['cpf']),
+                'error_message'=>MWPCLocale::get('invalid_cpf'),
+            ],
+            [
+                'result'=>CoreUtils::validate_email($item['email']),
+                'error_message'=>MWPCLocale::get('invalid_email'),
+            ],            
+        ];
+    }
 };

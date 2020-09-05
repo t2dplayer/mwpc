@@ -17,6 +17,7 @@ abstract class Status {
     const Success = 1;
     const Error = 2;
     const NotFound = 4;
+    const Invalid = 8;
 };
 
 abstract class SQLCommand {
@@ -38,7 +39,7 @@ class Result {
     }
 };
 
-function notice(&$sql_command, &$sql_status) {
+function notice(&$sql_command, &$sql_status, $validate_result = array()) {
     if ($sql_status == Status::Success
         || $sql_status == Status::None) return '';
     $result = "Ocorreu um erro ao tentar ";
@@ -51,15 +52,20 @@ function notice(&$sql_command, &$sql_status) {
     } else if ($sql_command == SQLCommand::Select) {
         $result .= "localizar ";
     }
-    $result .= "o registro.";
-    return HTMLTemplates::_self()->get('div_message', [
+    $result .= "o registro.<br />";
+    foreach ($validate_result as $arr) {
+        if ($arr['result']) continue;
+        $result .= $arr['error_message'] . '<br />';
+    }
+    return HTMLTemplates::_self()->get('div_error', [
         '%content'=>$result,
     ]);
 }
 
 function message(&$sql_command, &$sql_status) {
     if ($sql_status == Status::Error
-        || $sql_status == Status::None) {            
+        || $sql_status == Status::None
+        || $sql_status == Status::Invalid) {            
             return '';
     }
     $result = "Registro  ";
@@ -82,7 +88,13 @@ function save(&$table, &$table_name, &$item) {
     $result = null;
     $sql_command = SQLCommand::None;  
     $item = shortcode_atts($table->get_defaults(), $_REQUEST);
-    $success = $table->validate($item);
+    $success = true;
+    $validate_result = $table->validate($item);
+    if (sizeof($validate_result) > 0) {
+        foreach ($validate_result as $arr) {
+            $success &= $arr['result'];
+        }
+    }
     if ($success) {
         if ($item['id'] == 0) {
             $sql_command = SQLCommand::Insert;
@@ -92,7 +104,13 @@ function save(&$table, &$table_name, &$item) {
             $result = update_item($table, $table_name, $item);                
         }
     } else {
-        // validation error
+        if (sizeof($validate_result) > 0) {
+            foreach ($validate_result as $arr) {
+                if ($arr['result'] == false) {
+                    return new Result(SQLCommand::None, Status::Invalid, $validate_result);
+                }
+            }
+        }        
     }
     if (!isset($result)) $status = Status::Error;
     else $status = Status::Success;
@@ -139,7 +157,7 @@ function create_form_handler(&$table) {
         '%title'=>$table->project_settings['title'], 
         '%link'=>URLUtils::URLPage($table->project_settings['id']),
         '%back'=>MWPCLocale::get('back'),
-        '%notice'=>notice($result->sql_command, $result->status),
+        '%notice'=>notice($result->sql_command, $result->status, $result->result),
         '%message'=>message($result->sql_command, $result->status),
         '%nonce'=>wp_create_nonce(basename(__FILE__)),
         '%id'=>isset($_REQUEST['id']) ? $_REQUEST['id'] : '',

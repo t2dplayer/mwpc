@@ -14,6 +14,7 @@ class HTMLTemplates {
             'add_new',
             'delete_link',
             'div_message',
+            'div_error',
             'edit_link',
             'form_handler_footer',
             'form_handler_header',
