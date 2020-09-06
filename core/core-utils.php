@@ -31,4 +31,15 @@ class CoreUtils {
         }
         return true;
     }
+    public static function merge($keys, $values) {
+        if (sizeof($keys) != sizeof($values)) {
+            throw new Exception("Invalid size of fields and fields_types");
+        }
+        $result = [];
+        for($i = 0; $i < sizeof($keys); $i++) {
+            if(empty($values[$i])) continue;
+            $result[$keys[$i]] = $values[$i];
+        }
+        return $result;
+    }
 }

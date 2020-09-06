@@ -11,6 +11,13 @@ foreach($files as $f) {
 }
 
 class Student extends TableBase {
+    protected $types = array(
+        'egress'=>'Egresso', 
+        'coautor'=>'Co-Autor', 
+        'graduate'=>'Graduação', 
+        'mastering'=>'Mestrado', 
+        'phd'=>'Doutorado',
+    );
     function __construct($table_name) {
         parent::__construct(array(
             'singular' => 'student',
@@ -19,31 +26,36 @@ class Student extends TableBase {
         $this->configure('Lista de Discentes e Co-autores',
                          'Discentes, Egressos e Coautores');
         $this->fields = ['id', 'user_id', 'name', 'cpf', 'email', 'type'];
-        $this->defaults = [0, get_current_user_id(), '', '', '', 'graduate'];
-        $this->fields_types = [
+        $this->defaults = CoreUtils::merge($this->fields, [
+            0, 
+            get_current_user_id(), 
+            '', 
+            '', 
+            '', 
+            'graduate'
+        ]);
+        $this->fields_types = CoreUtils::merge($this->fields, [
             '',
-            '',
+            FormUtils::TableSelect(SQLTemplates::_self()->get('select_all', [
+                '%fields'=>'id as value, display_name as label',
+                '%tablename'=>'wp_users',
+            ])),
             FormUtils::Input('text', 'Digite o nome aqui'),
             FormUtils::Input('text', 'Digite um CPF válido aqui'),
             FormUtils::Input('email', 'Digite um E-mail válido aqui'),
-            FormUtils::Select([
-                'egress'=>MWPCLocale::get('egress'), 
-                'coautor'=>MWPCLocale::get('coautor'), 
-                'graduate'=>MWPCLocale::get('graduate'), 
-                'mastering'=>MWPCLocale::get('mastering'), 
-                'phd'=>MWPCLocale::get('phd'), 
-                ]
-            ),
-        ];
-        $this->labels = [
+            FormUtils::Select($this->types),
+        ]);
+        $this->labels = CoreUtils::merge($this->fields, [
             MWPCLocale::get('id'),
             MWPCLocale::get('teacher'),
             MWPCLocale::get('name'),
             MWPCLocale::get('cpf'),
             MWPCLocale::get('email'),
             MWPCLocale::get('type'),
-        ];
-        $this->is_sortable = [false, false, true, false, false, true];
+        ]);
+        $this->is_sortable = CoreUtils::merge($this->fields,[
+            false, false, true, false, false, true
+        ]);
     }
     public function make_sql() {
         $s = Settings::_self();
@@ -71,5 +83,9 @@ class Student extends TableBase {
                 'error_message'=>MWPCLocale::get('invalid_email'),
             ],            
         ];
+    }
+    public function column_type($item) {
+        CoreUtils::log($this->types);
+        return $this->types[$item['type']];
     }
 };

@@ -65,7 +65,8 @@ function notice(&$sql_command, &$sql_status, $validate_result = array()) {
 function message(&$sql_command, &$sql_status) {
     if ($sql_status == Status::Error
         || $sql_status == Status::None
-        || $sql_status == Status::Invalid) {            
+        || $sql_status == Status::Invalid
+        || $sql_command == SQLCommand::Select) {            
             return '';
     }
     $result = "Registro  ";

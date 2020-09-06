@@ -27,5 +27,25 @@ class FormUtils {
             return $html;
         };
         return ['html'=>$html, 'options'=>$options, 'f'=>$f];
-    }    
+    }
+    public static function TableSelect($sql) {
+        $html = HTMLTemplates::_self()->get('select');
+        $f = function($html, $selected, $sql) {
+            global $wpdb;
+            $options_html = "";
+            $rows = $wpdb->get_results($sql);
+            foreach($rows as $row) {
+                $options_html .= HTMLTemplates::_self()->get('option', [
+                    '%value'=>$row->value,
+                    '%label'=>$row->label,
+                    '%selected'=>($selected == $row->value) ? "selected" : "",
+                ]);
+            }
+            $html = HTMLTemplates::_self()->get('select', [
+                '%options'=>$options_html,
+            ]);
+            return $html;
+        };
+        return ['html'=>$html, 'options'=>$sql, 'f'=>$f];
+    }      
 };

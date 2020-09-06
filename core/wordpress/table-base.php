@@ -138,24 +138,14 @@ class TableBase extends WP_List_Table {
     }
     public function get_columns()
     {
-        if (sizeof($this->fields) != sizeof($this->labels)) {
-            throw new Exception("Invalid size of fields and labels");
-        }        
-        $columns = array_combine($this->fields, $this->labels);
-        $columns = array('cb'=>'<input type="checkbox" />') + $columns;
-        return $columns;
+        if (!array_key_exists('cb', $this->labels)) {
+            $this->labels = array('cb'=>'<input type="checkbox" />') + $this->labels;
+        }
+        return $this->labels;
     } 
     public function get_sortable_columns()
     {
-        if (sizeof($this->fields) != sizeof($this->is_sortable)) {
-            throw new Exception("Invalid size of fields and is_sortable");
-        }
-        $columns = [];
-        for($i = 0; $i < sizeof($this->fields); $i++) {
-            $f = &$this->fields[$i];
-            $columns[$f] = array($f, $this->is_sortable[$i]);
-        }
-        return $columns;
+        return $this->is_sortable;
     }    
     // Bulk Actions
     public function get_bulk_actions()
@@ -207,27 +197,10 @@ class TableBase extends WP_List_Table {
         return $this->fields;
     }
     public function get_form_fields() {
-        if (sizeof($this->fields) != sizeof($this->fields_types)) {
-            throw new Exception("Invalid size of fields and fields_types");
-        }
-        $columns = [];
-        for($i = 0; $i < sizeof($this->fields); $i++) {
-            if(empty($this->fields_types[$i])) continue;
-            $f = &$this->fields[$i];
-            $columns[$f] = $this->fields_types[$i];
-        }
-        return $columns;
+        return $this->fields_types;
     }
     public function get_defaults() {
-        if (sizeof($this->fields) != sizeof($this->defaults)) {
-            throw new Exception("Invalid size of fields and defaults");
-        }
-        $columns = [];
-        for($i = 0; $i < sizeof($this->fields); $i++) {
-            $f = &$this->fields[$i];
-            $columns[$f] = $this->defaults[$i];
-        }
-        return $columns;
+        return $this->defaults;
     }
     public function validate($item) {
         return true;
