@@ -1,0 +1,1 @@
+            <th class="manage-column" scope="col">%label</th>

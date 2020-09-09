@@ -16,12 +16,15 @@ require_once 'core/wordpress/meta-box-handler.php';
 /* you must put your project header here */
 function your_project_objects() {
     require_once 'pgquim/header.php';
-    Settings::_self()->add_object('student', new Student('student'));
+    Settings::_self()->add_objects([
+        'student'=>new Student('student'),
+        'skill'=>new Skill('skill'),
+        'student_has_skill'=>new StudentHasSkill('student_has_skill')
+    ]);
 }
 
-
 /* Now we need to create the menu items */
-function admin_menu_install()
+function mwpc_plugin_admin_menu_install()
 {
     your_project_objects();
     if (is_admin()) {
@@ -31,10 +34,11 @@ function admin_menu_install()
     }
     mwpc_make_menu_items(Settings::_self()->get_objects());
 }
-add_action('admin_menu', 'admin_menu_install');
+add_action('admin_menu', 'mwpc_plugin_admin_menu_install');
 
 /* It's time to create all tables */
-function table_install() {    
+function mwpc_plugin_table_install() {
+    your_project_objects();
     mwpc_table_install(Settings::_self()->get_objects());
 }
-register_activation_hook(__FILE__, 'table_install');
+register_activation_hook(__FILE__, 'mwpc_plugin_table_install');

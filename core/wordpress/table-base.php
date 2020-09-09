@@ -13,6 +13,7 @@ if (!class_exists('WP_List_Table')) {
 abstract class Role {
     const ADMIN = 0;// Show in admin and user wordpress account
     const USER = 1;// Show only in user wordpress account
+    const ONLY_TABLE = 2; //creates only table
 }
 
 class TableBase extends WP_List_Table {
@@ -20,11 +21,12 @@ class TableBase extends WP_List_Table {
     protected $table_name = "";
     public $role = 1;
     public $project_settings = [];  
-    protected $fields = [];
-    protected $labels = [];
-    protected $defaults = [];
+    public $fields = [];// name of the fields
+    public $detail_fields = [];// setting of detail field
+    protected $labels = [];// label to show on insert form
+    protected $defaults = [];// default values
     protected $is_sortable = [];
-    protected $fields_types = [];
+    protected $fields_types = [];// html of fields the will be shown on form
     public function __construct($array, $table_name = "", $role = Role::USER) {
         global $status, $page;
         $this->project_settings = ProjectSettings::Make_Settings();
@@ -61,15 +63,6 @@ class TableBase extends WP_List_Table {
         }
     }
     private function get_items($per_page, $sortable) {
-        if (!function_exists('array_key_first')) {
-            function array_key_first(array $arr)
-            {
-                foreach ($arr as $key => $unused) {
-                    return $key;
-                }
-                return null;
-            }
-        }        
         global $wpdb;
         $paged = isset($_REQUEST['paged']) ? ($per_page * max(0, intval($_REQUEST['paged']) - 1)) : 0;
         $sql_select = "";
@@ -203,6 +196,6 @@ class TableBase extends WP_List_Table {
         return $this->defaults;
     }
     public function validate($item) {
-        return true;
+        return array();
     }
 }

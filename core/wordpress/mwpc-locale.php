@@ -20,6 +20,7 @@ class MWPCLocale {
         'save_changes'=>'Salvar alterações',
         'invalid_cpf'=>'CPF inválido!',
         'invalid_email'=>'E-mail inválido!',
+        'search'=>'Buscar',
     ];
     public static function get($key) {
         if (!array_key_exists($key, MWPCLocale::$message_map)) CoreUtils::log("Invalid key -> ". $key);

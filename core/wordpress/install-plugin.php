@@ -41,7 +41,8 @@ function mwpc_make_admin_menu_items($objects) {
 
 function mwpc_make_menu_items($objects) {
     foreach ($objects as $key=>$obj) {
-        if ($obj->role == Role::ADMIN) continue;
+        if ($obj->role == Role::ADMIN
+            || $obj->role == Role::ONLY_TABLE) continue;
         mwpc_make_menu($obj->project_settings);
     }  
 }

@@ -1,15 +1,36 @@
 <?php
 
-function insert_item(&$table, &$table_name, &$item) {
+function delete_all(&$table_name, $item) {
+    global $wpdb;
+    $attr = "";
+    $counter = 0;
+    foreach($item as $key=>$value) {
+        $attr .= "$key = $value";
+        if ($counter++ < sizeof($item) - 1) {
+            $attr .= " AND ";            
+        }
+    }
+    $sql = SQLTemplates::_self()->get('delete_where', [
+        "%tablename"=>$table_name,
+        "%attr"=>$attr,
+    ]);
+    $wpdb->query($sql);
+}
+
+function insert_item(&$table_name, &$item) {
     global $wpdb;
     $result = $wpdb->insert($table_name, $item);
     $item['id'] = $wpdb->insert_id;
-    return $result;
+    return $item;
 }
 
 function update_item(&$table, &$table_name, &$item) {
     global $wpdb;
-    return $wpdb->update($table_name, $item, array('id' => $item['id']));
+    foreach ($table->detail_fields as $value) {
+        unset($item[$value]);
+    }
+    $wpdb->update($table_name, $item, array('id' => $item['id']));
+    return $item;
 }
 
 abstract class Status {
@@ -53,9 +74,11 @@ function notice(&$sql_command, &$sql_status, $validate_result = array()) {
         $result .= "localizar ";
     }
     $result .= "o registro.<br />";
-    foreach ($validate_result as $arr) {
-        if ($arr['result']) continue;
-        $result .= $arr['error_message'] . '<br />';
+    if (is_array($validate_result)) {
+        foreach ($validate_result as $arr) {
+            if ($arr['result']) continue;
+            $result .= $arr['error_message'] . '<br />';
+        }
     }
     return HTMLTemplates::_self()->get('div_error', [
         '%content'=>$result,
@@ -84,26 +107,71 @@ function message(&$sql_command, &$sql_status) {
     return $html;
 }
 
-function save(&$table, &$table_name, &$item) {
+function get_detail_table(&$item) {
+    $result = array();
+    foreach($item as $key=>$value) {
+        if (is_array($value)) {
+            $result[$key] = $value;
+            unset($item[$key]);
+        }
+    }
+    return $result;
+}
+
+function save_sub_item(&$table, &$table_name, &$detail, &$item) {  
+    foreach($table->detail_fields as $first_key) {  
+        $detail_table_name = $table_name . "_has_" .$first_key;
+        foreach($detail[$first_key] as $d) {
+            $sub_item = [
+                'user_id'=>get_current_user_id(),
+                $table->project_settings['id'] . '_id'=>$item['id'],
+                $first_key . "_id"=>$d[0],
+            ];
+            $r = insert_item($detail_table_name, $sub_item);
+        }
+    }
+}
+
+function save_or_update(&$table, &$table_name, &$item, &$detail) {
+    $result = null;
+    // saving new item
+    if ($item['id'] == 0) {
+        $sql_command = SQLCommand::Insert;
+        $result = insert_item($table_name, $item);
+    } else { // updating item
+        foreach($table->detail_fields as $key) {
+            $options = [
+                'user_id'=>get_current_user_id(),
+                $table->project_settings['id'] . '_id'=>$item['id'],
+            ];
+            $detail_table_name = $table_name . "_has_" .$key;
+            delete_all($detail_table_name, $options);
+        }
+        $sql_command = SQLCommand::Update;
+        $result = update_item($table, $table_name, $item);                
+    }
+    if (sizeof($detail) > 0) {
+        save_sub_item($table, $table_name, $detail, $item);
+    }
+    return $result;
+}
+
+function post(&$table, &$table_name, &$item) {
     $status = Status::None;
     $result = null;
-    $sql_command = SQLCommand::None;  
+    $sql_command = SQLCommand::None;    
     $item = shortcode_atts($table->get_defaults(), $_REQUEST);
-    $success = true;
+    $detail = get_detail_table($item);
     $validate_result = $table->validate($item);
+    $success = true;
     if (sizeof($validate_result) > 0) {
         foreach ($validate_result as $arr) {
             $success &= $arr['result'];
         }
     }
+    $success = true;
     if ($success) {
-        if ($item['id'] == 0) {
-            $sql_command = SQLCommand::Insert;
-            $result = insert_item($table, $table_name, $item);
-        } else {
-            $sql_command = SQLCommand::Update;
-            $result = update_item($table, $table_name, $item);                
-        }
+        $result = save_or_update($table, $table_name, $item, $detail);
     } else {
         if (sizeof($validate_result) > 0) {
             foreach ($validate_result as $arr) {
@@ -113,8 +181,11 @@ function save(&$table, &$table_name, &$item) {
             }
         }        
     }
-    if (!isset($result)) $status = Status::Error;
-    else $status = Status::Success;
+    if (!isset($result)) {
+        $status = Status::Error;
+    } else { 
+        $status = Status::Success;
+    }
     return new Result($sql_command, $status, $result);
 }
 
@@ -141,10 +212,26 @@ function create_form_handler(&$table) {
     $item = [];
     if (isset($_REQUEST['nonce']) 
     && wp_verify_nonce($_REQUEST['nonce'], basename(__FILE__))) {  
-        $result = save($table, $table_name, $item);
+        $result = post($table, $table_name, $item);
     } else {
         $result = load($table, $table->project_settings['id']);
     }
+    if (isset($result->result['id'])) {
+        $prefix = Settings::_self()->get_prefix();
+        $detail_results = [];    
+        foreach ($table->detail_fields as $key) {
+            $detail_table_name = $table->project_settings['id'] . "_has_" .$key;
+            $detail_results += DatabaseUtils::inner_join_all([
+                '%detailtable'=>$prefix . $detail_table_name,
+                '%mastertable'=>$prefix . $key,
+                '%detailfield'=>$key,
+                '%itemfield'=>$table->project_settings['id'],
+                '%itemvalue'=>$result->result['id'],
+            ]);
+            $result->result[$key] = $detail_results;
+        }
+    }
+
     $item = $result->result;
     add_meta_box(
         $table->project_settings['meta_box_id'],
@@ -153,7 +240,7 @@ function create_form_handler(&$table) {
         $table->project_settings['id'],
         'normal',
         'default'
-    );
+    );    
     echo HTMLTemplates::_self()->get('form_handler_header', [
         '%title'=>$table->project_settings['title'], 
         '%link'=>URLUtils::URLPage($table->project_settings['id']),

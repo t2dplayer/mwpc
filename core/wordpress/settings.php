@@ -19,7 +19,15 @@ class Settings {
         return $this->objects;
     }    
     public function add_object($key, $object) {
-        $this->objects[$key] = $object;
+        if (!array_key_exists($key, $this->objects)) {
+            $this->objects[$key] = $object;
+        }        
+    }
+    public function add_objects($objects = array()) {
+        foreach($objects as $key=>$value) {
+            $this->add_object($key, $value);
+        }
+        
     }
     public function get_database_name() {
         return $this->database_name;

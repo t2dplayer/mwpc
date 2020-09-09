@@ -8,7 +8,7 @@ class DatabaseUtils {
     public static function create_table($sql) {
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         global $wpdb;
-        dbDelta($sql);    
+        dbDelta($sql);
     }
     public static function count_items($table_name) {
         global $wpdb;
@@ -16,6 +16,22 @@ class DatabaseUtils {
             '%tablename'=>Settings::_self()->table_name($table_name)
         ]);
         return $wpdb->get_var($sql_count);
+    }
+    public static function inner_join($item) {
+        global $wpdb;
+        $sql = SQLTemplates::_self()->get('select_join', $item);        
+        $results = $wpdb->get_results($sql);
+        $str = "";
+        foreach ($results as $r) {
+            $str .= '<em>'. $r->name .'</em></br>';
+        }
+        return $str;
+    }
+    public static function inner_join_all($item) {
+        global $wpdb;
+        $sql = SQLTemplates::_self()->get('select_join_all', $item);        
+        $results = $wpdb->get_results($sql);
+        return $results;
     }
 }
 

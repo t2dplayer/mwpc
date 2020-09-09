@@ -26,6 +26,10 @@ class HTMLTemplates {
             'table_header',
             'table_tr',
             'table_footer',
+            'table_multiselect',
+            'th_column',
+            'td',
+            'th_scope',
         ];
         foreach($keys as $k) {
             $filename = str_replace("_", "-", $k) . ".php";

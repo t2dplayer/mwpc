@@ -14,7 +14,10 @@ class SQLTemplates {
         'select_prepare_adm'=>'SELECT * FROM %tablename WHERE user_id = %userid ORDER BY %orderby %order LIMIT %d OFFSET %d;',
         'select_where_id'=>'SELECT * FROM %tablename WHERE id = %d;',
         'select_all'=>'SELECT %fields FROM %tablename;',
-        'full_table_name'=>'`%database`.`table`',
+        'full_table_name'=>'`%database`.`%table`',
+        'select_join'=>'SELECT master.name FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %itemvalue;',
+        'select_join_all'=>'SELECT master.*, detail.* FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %itemvalue;',
+        'delete_where'=>'DELETE FROM %tablename WHERE %attr;',
     ];
     public static function get($key, $data=array()) {
         if (!array_key_exists($key, SQLTemplates::$sql_map)) CoreUtils::log("Invalid key -> ". $key);

@@ -1,5 +1,15 @@
 <?php
 
+if (!function_exists('array_key_first')) {
+    function array_key_first(array $arr)
+    {
+        foreach ($arr as $key => $unused) {
+            return $key;
+        }
+        return null;
+    }
+}
+
 class CoreUtils {
     public static function log($obj) {
         $var = print_r($obj, true);
@@ -37,9 +47,16 @@ class CoreUtils {
         }
         $result = [];
         for($i = 0; $i < sizeof($keys); $i++) {
-            if(empty($values[$i])) continue;
+            //if(empty($values[$i])) continue;
             $result[$keys[$i]] = $values[$i];
         }
         return $result;
+    }
+    public static function mask($mask, $string) {
+        $string = str_replace(" ","", $string);
+        for($i = 0; $i < strlen($string); ++$i) {
+            $mask[strpos($mask,"#")] = $string[$i];
+        }
+        return $mask;
     }
 }

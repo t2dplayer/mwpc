@@ -25,25 +25,34 @@ class Student extends TableBase {
         ), $table_name, Role::ADMIN);
         $this->configure('Lista de Discentes e Co-autores',
                          'Discentes, Egressos e Coautores');
-        $this->fields = ['id', 'user_id', 'name', 'cpf', 'email', 'type'];
+        $this->fields = ['id', 'user_id', 'name', 'cpf', 'email', 'type', 'skill'];
+        $this->detail_fields = ['skill'];
         $this->defaults = CoreUtils::merge($this->fields, [
             0, 
             get_current_user_id(), 
             '', 
             '', 
             '', 
-            'graduate'
+            'graduate',
+            '',
         ]);
         $this->fields_types = CoreUtils::merge($this->fields, [
             '',
-            FormUtils::TableSelect(SQLTemplates::_self()->get('select_all', [
-                '%fields'=>'id as value, display_name as label',
-                '%tablename'=>'wp_users',
-            ])),
+            FormUtils::TableSelect([
+                'sql'=>SQLTemplates::_self()->get('select_all', [
+                    '%fields'=>'id as value, display_name as label',
+                    '%tablename'=>'wp_users',
+                ]),
+                'selected_key'=>'id',
+            ]),
             FormUtils::Input('text', 'Digite o nome aqui'),
             FormUtils::Input('text', 'Digite um CPF válido aqui'),
             FormUtils::Input('email', 'Digite um E-mail válido aqui'),
-            FormUtils::Select($this->types),
+            FormUtils::Select(['enum'=>$this->types, 'selected_key'=>'type']),
+            FormUtils::MultiSelectClass([
+                'table_name'=>'skill',
+                'fields'=>['id', 'name'],
+            ]),
         ]);
         $this->labels = CoreUtils::merge($this->fields, [
             MWPCLocale::get('id'),
@@ -52,9 +61,10 @@ class Student extends TableBase {
             MWPCLocale::get('cpf'),
             MWPCLocale::get('email'),
             MWPCLocale::get('type'),
+            "Habilidades",
         ]);
         $this->is_sortable = CoreUtils::merge($this->fields,[
-            false, false, true, false, false, true
+            false, false, true, false, false, true, false
         ]);
     }
     public function make_sql() {
@@ -85,7 +95,18 @@ class Student extends TableBase {
         ];
     }
     public function column_type($item) {
-        CoreUtils::log($this->types);
         return $this->types[$item['type']];
     }
+    public function column_cpf($item) {
+        return CoreUtils::mask("###.###.###-##", $item['cpf']);
+    }
+    public function column_skill($item) {
+        return DatabaseUtils::inner_join([
+            '%detailtable'=>'mwpc_student_has_skill',
+            '%mastertable'=>'mwpc_skill',
+            '%detailfield'=>'skill',
+            '%itemfield'=>'student',
+            '%itemvalue'=>$item['id'],
+        ]);
+    }    
 };
