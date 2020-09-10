@@ -65,7 +65,7 @@ class FormUtils {
         //CoreUtils::log($options);
         return $result;
     }
-    public static function MultiSelectClass($options=array()) {
+    public static function TableMultiSelect($options=array()) {
         $html = HTMLTemplates::_self()->get('table_multiselect');
         $sql = SQLTemplates::_self()->get("select_all", [
             '%fields'=>'id as value, name as label',
@@ -107,4 +107,84 @@ class FormUtils {
         };
         return ['html'=>$html, 'options'=>$options, 'f'=>$f];
     }
+    private static function CreateCombobox(&$html, &$options) {
+        if (key_exists('combobox', $options)) {
+            $opt = "";
+            $ifelse = "";
+            $table_values = "";
+            $counter = 0;
+            foreach ($options['combobox'] as $arr) {
+                if (!key_exists('fields', $arr)) continue;
+                $jsfields = "";
+                foreach($arr['fields'] as $field=>$type) {
+                    $jsfields .= HTMLTemplates::_self()->get('js_field', [
+                        '%label'=>MWPCLocale::get($field),
+                        '%type'=>$type,
+                        '%id'=>$field,
+                    ]);
+                }
+                $ifelse .= "if(value==" . $arr['value'] . "){\n";
+                $ifelse .= HTMLTemplates::_self()->get('js_table', [
+                    '%jsfields'=>$jsfields,
+                ]);
+                $ifelse .= "}";
+                if ($counter < sizeof($options['combobox']) - 1) {
+                    $ifelse .= " else ";
+                }
+                $opt .= HTMLTemplates::_self()->get('dynamic_option', [
+                    '%value'=>$arr['value'],
+                    '%label'=>$arr['label'],
+                ]);
+                $counter++;
+            }
+            $html .= HTMLTemplates::_self()->get('dynamic_combobox', [
+                '%options'=>$opt,
+                '%ifelse'=>$ifelse,
+                '%tablevalues'=>$table_values,
+            ]);
+        }
+    }
+    public static function DetailTableMultiSelect($options=array()) {
+        $html = HTMLTemplates::_self()->get('detail_table_multiselect');
+        $sql = SQLTemplates::_self()->get("select_all", [
+            '%fields'=>'id as value, name as label',
+            '%tablename'=>SQLTemplates::_self()->full_table_name($options['table_name'])
+        ]);
+        $options['sql'] = $sql;
+        $f = function($options) {
+            global $wpdb;
+            $get_results = $wpdb->get_results($options['sql']);
+            $columns = "";
+            $rows = "";
+            foreach($options['fields'] as $field) {
+                $columns .= HTMLTemplates::_self()->get('th_column', [
+                    '%label'=>MWPCLocale::get($field),
+                ]);
+            }
+            $selected_ids = FormUtils::GetDetailIDs($options);
+            foreach($get_results as $row) {
+                $rows .= "<tr>";
+                $rows .= HTMLTemplates::_self()->get('th_scope', [
+                    '%id'=>$options['table_name'] . "[]",
+                    '%value'=>$row->value,
+                    '%checked'=>in_array($row->value, $selected_ids) ? "checked" : "",
+                ]);                
+                foreach ($row as $r) {
+                    $rows .= HTMLTemplates::_self()->get('td', [
+                        '%value'=>$r,
+                    ]);
+                }
+                $rows .= "<tr />";
+            }
+            $html = HTMLTemplates::_self()->get('detail_table_multiselect', [
+                '%searchlabel'=>MWPCLocale::get("search"),
+                '%searchplaceholder'=>MWPCLocale::get("search"),
+                '%columns'=>$columns,
+                '%rows'=>$rows,
+            ]);
+            FormUtils::CreateCombobox($html, $options);
+            return $html;
+        };
+        return ['html'=>$html, 'options'=>$options, 'f'=>$f];
+    }    
 };

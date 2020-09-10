@@ -25,8 +25,20 @@ class Student extends TableBase {
         ), $table_name, Role::ADMIN);
         $this->configure('Lista de Discentes e Co-autores',
                          'Discentes, Egressos e Coautores');
-        $this->fields = ['id', 'user_id', 'name', 'cpf', 'email', 'type', 'skill'];
-        $this->detail_fields = ['skill'];
+        $this->fields = [
+            'id', 
+            'user_id', 
+            'name', 
+            'cpf', 
+            'email', 
+            'type', 
+            'skill',
+            'paper',
+        ];
+        $this->detail_fields = [
+            'skill',
+            'paper',
+        ];
         $this->defaults = CoreUtils::merge($this->fields, [
             0, 
             get_current_user_id(), 
@@ -34,6 +46,7 @@ class Student extends TableBase {
             '', 
             '', 
             'graduate',
+            '',
             '',
         ]);
         $this->fields_types = CoreUtils::merge($this->fields, [
@@ -49,9 +62,27 @@ class Student extends TableBase {
             FormUtils::Input('text', 'Digite um CPF válido aqui'),
             FormUtils::Input('email', 'Digite um E-mail válido aqui'),
             FormUtils::Select(['enum'=>$this->types, 'selected_key'=>'type']),
-            FormUtils::MultiSelectClass([
+            FormUtils::TableMultiSelect([
                 'table_name'=>'skill',
                 'fields'=>['id', 'name'],
+            ]),
+            FormUtils::DetailTableMultiSelect([
+                'table_name'=>'paper',
+                'fields'=>['id', 'name', 'year'],
+                'combobox'=>[
+                    [
+                        'label'=>'Artigo Datado',
+                        'value'=>0,
+                        'fields'=>['name'=>"text", 'year'=>'text'],
+                        'type'=>"text",
+                    ],
+                    [
+                        'label'=>'Artigo Não Datado',
+                        'value'=>1,
+                        'fields'=>['name'=>'text'],
+                        'type'=>"text",
+                    ]
+                ],
             ]),
         ]);
         $this->labels = CoreUtils::merge($this->fields, [
@@ -62,9 +93,10 @@ class Student extends TableBase {
             MWPCLocale::get('email'),
             MWPCLocale::get('type'),
             "Habilidades",
+            "Artigos",
         ]);
         $this->is_sortable = CoreUtils::merge($this->fields,[
-            false, false, true, false, false, true, false
+            false, false, true, false, false, true, false, false
         ]);
     }
     public function make_sql() {
@@ -108,5 +140,8 @@ class Student extends TableBase {
             '%itemfield'=>'student',
             '%itemvalue'=>$item['id'],
         ]);
-    }    
+    }
+    public function column_paper($item) {
+        return "-";
+    }     
 };

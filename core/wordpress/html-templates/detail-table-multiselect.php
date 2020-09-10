@@ -1,13 +1,13 @@
 <style>
-#table-mwpc-wrapper {
+#table-mwpc-wrapper-%id {
   position:relative;
 }
-#table-mwpc-scroll {
-  height:150px;
+#table-mwpc-scroll-%id {
+  height:250px;
   overflow:auto;  
   margin-top:20px;
 }
-#table-mwpc-wrapper table {
+#table-mwpc-wrapper-%id table {
   width:100%;
     
 }
@@ -18,8 +18,8 @@
     <input class="regular-text" id="mwpc-filter" type="text" placeholder="%searchplaceholder">
 </p>
 -->
-<div id="table-mwpc-wrapper">
-  <div id="table-mwpc-scroll">
+<div id="table-mwpc-wrapper-%id">
+  <div id="table-mwpc-scroll-%id">
     <table class="wp-list-table widefat fixed striped table-view-list">
         <thead>
             <tr>
@@ -27,8 +27,9 @@
                 %columns
             </tr>
         </thead>
-        <tbody id="mwpc-table">        
-            %rows
+        <tbody id="mwpc-table-%id">
+            <tr></tr>
+            %rows        
         </tbody>
     </table>
   </div>

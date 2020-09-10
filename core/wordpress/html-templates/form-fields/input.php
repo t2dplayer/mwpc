@@ -8,4 +8,4 @@ $data  = [
     '%required'=>'', 
 ];
 -->
-<input id="%id" name="%id" type="%type" style="width: 95%" value="%value" size="%size" class="code" placeholder="%placeholder" %required />
+<input id="%id" name="%id" type="%type" value="%value" size="%size" class="regular-text" placeholder="%placeholder" %required />

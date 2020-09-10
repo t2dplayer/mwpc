@@ -27,9 +27,14 @@ class HTMLTemplates {
             'table_tr',
             'table_footer',
             'table_multiselect',
+            'detail_table_multiselect',
             'th_column',
             'td',
             'th_scope',
+            'dynamic_combobox',
+            'dynamic_option',
+            'js_field',
+            'js_table',
         ];
         foreach($keys as $k) {
             $filename = str_replace("_", "-", $k) . ".php";

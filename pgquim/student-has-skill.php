@@ -21,12 +21,6 @@ class StudentHasSkill extends TableBase {
         $sql_string = "CREATE TABLE IF NOT EXISTS %table (
             `id` INT NOT NULL AUTO_INCREMENT,
             `user_id` INT NOT NULL,
-            `name` VARCHAR(255) NOT NULL,
-            PRIMARY KEY  (`id`))
-          ENGINE = InnoDB;";
-        $sql_string = "CREATE TABLE IF NOT EXISTS %table (
-            `id` INT NOT NULL AUTO_INCREMENT,
-            `user_id` INT NOT NULL,
             `student_id` INT NOT NULL,
             `skill_id` INT NOT NULL,
             KEY(`id`),

@@ -19,7 +19,8 @@ function your_project_objects() {
     Settings::_self()->add_objects([
         'student'=>new Student('student'),
         'skill'=>new Skill('skill'),
-        'student_has_skill'=>new StudentHasSkill('student_has_skill')
+        'student_has_skill'=>new StudentHasSkill('student_has_skill'),
+        'paper'=>new Paper('paper'),
     ]);
 }
 

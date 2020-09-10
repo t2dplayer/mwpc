@@ -1,0 +1,160 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <title>Bootstrap Example</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+   </head>
+   <body>
+      <style>
+         #table-mwpc-wrapper-paper {
+         position:relative;
+         }
+         #table-mwpc-scroll-paper {
+         height:250px;
+         overflow:auto;  
+         margin-top:20px;
+         }
+         #table-mwpc-wrapper-paper table {
+         width:100%;
+         }
+      </style>
+      <div id="table-mwpc-wrapper-paper">
+         <div id="table-mwpc-scroll-paper">
+            <table class="wp-list-table fixed striped">
+               <thead>
+                  <tr>
+                     <th class="manage-column check-column" scope="col"></th>
+                     <th class="manage-column" scope="col">Código</th>
+                     <th class="manage-column" scope="col">Nome</th>
+                     <th class="manage-column" scope="col">Ano</th>
+                  </tr>
+               </thead>
+               <tbody id="mwpc-body-paper">
+                   <tr></tr>
+               </tbody>
+            </table>
+         </div>
+      </div>
+      <script>
+         jQuery(document).ready(function ($) {
+             $("#mwpc-plus-paper").click(function() {
+                 if (typeof mwpc_counter_paper == 'undefined') {
+                     mwpc_counter_paper = 0;
+                 }
+                 mwpc_counter_paper++;
+                 let value = $("#mwpc-type-paper").children("option:selected").val();
+                 if(value==0) {
+                     $("#mwpc-canvas-paper:last").after(`
+                     <table style="padding:5px;" id="mwpc-item-paper-` + mwpc_counter_paper + `" class="presentation">
+                        <tbody id="mwpc-detail-body-paper">
+                            <tr>
+                               <td>
+                                   <label class="">Nome</label>
+                                </td>
+                                <td>
+                                    <input type="text" id="name" name="name" required />
+                                </td>
+                                <td>
+                                    <label class="">Ano</label>
+                                </td>
+                                <td>
+                                    <input type="text" id="year" name="year" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="mwpc-save-paper" itemid="` + mwpc_counter_paper + `" class="btn btn-primary">
+                                        Salvar
+                                    </div>
+                                </td>
+                                <td>
+                                    <div itemid="` + mwpc_counter_paper + `" id="mwpc-cancel-paper" class="btn btn-primary">
+                                        Cancelar
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                     `);
+         } else if(value==1){
+             $("#mwpc-canvas-paper:last").after(`
+                     <table style="padding:5px;" id="mwpc-item-paper-` + mwpc_counter_paper + `" class="presentation">
+                         <tbody id="mwpc-detail-body-%id">
+                             <tr>
+                                <td>
+                                     <label class="">Nome</label>
+                                 </td>
+                                 <td>
+                                     <input type="text" id="name" name="name" required />
+                                 </td>
+                             </tr>
+                             <tr>
+                                 <td>
+                                     <div id="mwpc-save-paper" itemid="` + mwpc_counter_paper + `" class="btn btn-primary">
+                                         Salvar
+                                     </div>
+                                 </td>
+                                 <td>
+                                     <div itemid="` + mwpc_counter_paper + `" id="mwpc-cancel-paper" class="btn btn-primary">
+                                         Cancelar
+                                     </div>
+                                 </td>
+                             </tr>
+                         </tbody>
+                     </table>
+                     `);
+         }
+                 $("#mwpc-cancel-paper").click(function() {
+                     $('#mwpc-item-paper-' + this.getAttribute("itemid")).remove();
+                 });
+                 $("#mwpc-save-paper").click(function(){
+                     console.log("click save");
+                     let validated = true;
+                     let objects = $('tbody#mwpc-detail-body-paper tr td input');
+                     for (i=0; i<objects.length;++i) {
+                         if (objects[i].required
+                            && objects[i].value.length == 0) {
+                            objects[i].setAttribute('placeholder', 'Preencha este campo');
+                            objects[i].focus();
+                            validated = false;
+                            break;
+                         }
+                     }
+
+                     if (validated) {
+                        let itemid = this.getAttribute("itemid");
+                        let row = "";
+                        key = "";
+                        for (i=0; i<objects.length;++i) {
+                            key += objects[i].value;
+                            if (i < objects.length - 1) key += ";";
+                        }
+                        row += '<td></td><td><input type="hidden" name="paper[]" value="' + key + '"></td>';
+                        for (i=0; i<objects.length;++i) {                            
+                            row += '<td>' + objects[i].value + '</td>';
+                        }
+                        console.log(row);
+                        $("#mwpc-body-paper tr:last").after(row);
+                        $('#mwpc-item-paper-' + this.getAttribute("itemid")).remove();
+                     }
+                 });             
+             });
+         });
+      </script>
+      <div class="mwpc-combobox-paper" style="float: inline">
+         <select id="mwpc-type-paper">
+            <option value="0">Artigo Datado</option>
+            <option value="1">Artigo Não Datado</option>
+         </select>
+         <div id="mwpc-plus-paper" class="btn btn-primary">+</div>
+      </div>
+      <div id="mwpc-canvas-paper"></div>
+   </body>
+</html>
+
