@@ -32,7 +32,7 @@
                     let row = "<tr>";
                     key = "";
                     for (i=0; i<objects.length;++i) {
-                        key += objects[i].value;
+                        key += objects[i].id + ':' + objects[i].value;
                         if (i < objects.length - 1) key += ";";
                     }
                     row += '<td></td><td><input type="hidden" name="%id[]" value="' + key + '"></td>';

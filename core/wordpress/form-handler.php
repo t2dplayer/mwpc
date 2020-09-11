@@ -26,7 +26,7 @@ function insert_item(&$table_name, &$item) {
 
 function update_item(&$table, &$table_name, &$item) {
     global $wpdb;
-    foreach ($table->detail_fields as $value) {
+    foreach ($table->detail_fields as $value=>$data) {
         unset($item[$value]);
     }
     $wpdb->update($table_name, $item, array('id' => $item['id']));
@@ -118,16 +118,31 @@ function get_detail_table(&$item) {
     return $result;
 }
 
-function save_sub_item(&$table, &$table_name, &$detail, &$item) {  
-    foreach($table->detail_fields as $first_key) {  
+function save_sub_item(&$table, &$table_name, &$detail, &$item) {
+    foreach($table->detail_fields as $first_key=>$data) {  
         $detail_table_name = $table_name . "_has_" .$first_key;
-        foreach($detail[$first_key] as $d) {
-            $sub_item = [
-                'user_id'=>get_current_user_id(),
-                $table->project_settings['id'] . '_id'=>$item['id'],
-                $first_key . "_id"=>$d[0],
-            ];
-            $r = insert_item($detail_table_name, $sub_item);
+        if (key_exists($first_key, $detail)) {
+            foreach($detail[$first_key] as $d) {
+                $sub_item = [
+                    'user_id'=>get_current_user_id(),
+                    $table->project_settings['id'] . '_id'=>$item['id'],
+                ];
+                $obj = explode(";", $d);
+                if (sizeof($obj) > 1) {
+                    foreach($obj as $o) {
+                        $arr = explode(":", $o);
+                        if (sizeof($arr) == 2) {
+                            $sub_item[$arr[0]] = $arr[1];
+                        }
+                    }
+                } else {
+                    $sub_item[$first_key . "_id"] = $d[0];
+                }
+                $r = insert_item($detail_table_name, $sub_item);
+            }
+        } else {
+            // CoreUtils::log($detail);
+            // CoreUtils::log($item);
         }
     }
 }
@@ -139,7 +154,7 @@ function save_or_update(&$table, &$table_name, &$item, &$detail) {
         $sql_command = SQLCommand::Insert;
         $result = insert_item($table_name, $item);
     } else { // updating item
-        foreach($table->detail_fields as $key) {
+        foreach($table->detail_fields as $key=>$data) {
             $options = [
                 'user_id'=>get_current_user_id(),
                 $table->project_settings['id'] . '_id'=>$item['id'],
@@ -219,15 +234,11 @@ function create_form_handler(&$table) {
     if (isset($result->result['id'])) {
         $prefix = Settings::_self()->get_prefix();
         $detail_results = [];    
-        foreach ($table->detail_fields as $key) {
-            $detail_table_name = $table->project_settings['id'] . "_has_" .$key;
-            $detail_results += DatabaseUtils::inner_join_all([
-                '%detailtable'=>$prefix . $detail_table_name,
-                '%mastertable'=>$prefix . $key,
-                '%detailfield'=>$key,
-                '%itemfield'=>$table->project_settings['id'],
-                '%itemvalue'=>$result->result['id'],
-            ]);
+        foreach ($table->detail_fields as $key=>$value) {
+            $data =$value['data'];
+            $data['%itemvalue'] = $result->result['id'];
+            $sql = SQLTemplates::_self()->get($value['sql_template'], $data);        
+            $detail_results += $wpdb->get_results($sql);
             $result->result[$key] = $detail_results;
         }
     }

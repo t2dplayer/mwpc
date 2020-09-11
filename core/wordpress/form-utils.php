@@ -62,8 +62,19 @@ class FormUtils {
                 }
             }
         }
-        //CoreUtils::log($options);
         return $result;
+    }
+    public static function TableMultiSelectField($master, $detail) {
+        $prefix = Settings::_self()->get_prefix();
+        return [
+            'sql_template'=>'select_join_all',
+            'data'=>[
+                '%detailtable'=>$prefix . $detail,
+                '%mastertable'=>$prefix . $master,
+                '%detailfield'=>$master,
+                '%itemfield'=>$master,
+            ]
+        ];
     }
     public static function TableMultiSelect($options=array()) {
         $html = HTMLTemplates::_self()->get('table_multiselect');
@@ -144,30 +155,58 @@ class FormUtils {
             ]);
         }
     }
+    public static function ComboboxItem($label, $value, $fields) {
+        return [
+            'label'=>$label,
+            'value'=>$value,
+            'fields'=>$fields,
+            'type'=>"text",
+        ];
+    }
+    public static function DetailTableMultiSelectField($master, $detail) {
+        $prefix = Settings::_self()->get_prefix();
+        return [
+            'sql_template'=>'select_join_detail',
+            'data'=> [
+                '%detailtable'=>$prefix . $detail,
+                '%mastertable'=>$prefix . $master,
+                '%detailfield'=>$master,
+            ]
+        ];  
+    }
     public static function DetailTableMultiSelect($options=array()) {
         $html = HTMLTemplates::_self()->get('detail_table_multiselect');
-        $sql = SQLTemplates::_self()->get("select_all", [
-            '%fields'=>'id as value, name as label',
-            '%tablename'=>SQLTemplates::_self()->full_table_name($options['table_name'])
-        ]);
+        $fields = implode(',', $options['fields']);
+        $sql = SQLTemplates::_self()->get("select_fields_where", [
+            '%fields'=>$fields,
+            '%tablename'=>SQLTemplates::_self()->full_table_name($options['table_name']),
+        ]);        
         $options['sql'] = $sql;
         $f = function($options) {
             global $wpdb;
-            $get_results = $wpdb->get_results($options['sql']);
+            $fields = $options['fields'];
+            $options['sql'] = TemplateUtils::t($options['sql'], [
+                '%where'=>'user_id = %d AND '. $options['foreign_key'] . ' = %d'
+            ]);
+            $sql = $wpdb->prepare(
+                $options['sql'],
+                get_current_user_id(),
+                isset($_REQUEST['id']) ? $_REQUEST['id'] : "0"
+            );
+            $get_results = $wpdb->get_results($sql, ARRAY_A);
             $columns = "";
             $rows = "";
-            foreach($options['fields'] as $field) {
+            foreach($fields as $field) {
                 $columns .= HTMLTemplates::_self()->get('th_column', [
                     '%label'=>MWPCLocale::get($field),
                 ]);
             }
-            $selected_ids = FormUtils::GetDetailIDs($options);
             foreach($get_results as $row) {
                 $rows .= "<tr>";
                 $rows .= HTMLTemplates::_self()->get('th_scope', [
                     '%id'=>$options['table_name'] . "[]",
-                    '%value'=>$row->value,
-                    '%checked'=>in_array($row->value, $selected_ids) ? "checked" : "",
+                    '%value'=>$row['id'],
+                    '%checked'=>'',
                 ]);                
                 foreach ($row as $r) {
                     $rows .= HTMLTemplates::_self()->get('td', [

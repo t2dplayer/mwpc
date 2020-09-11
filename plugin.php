@@ -20,7 +20,7 @@ function your_project_objects() {
         'student'=>new Student('student'),
         'skill'=>new Skill('skill'),
         'student_has_skill'=>new StudentHasSkill('student_has_skill'),
-        'paper'=>new Paper('paper'),
+        'paper'=>new Paper('student_has_paper'),
     ]);
 }
 

@@ -15,9 +15,11 @@ class SQLTemplates {
         'select_where_id'=>'SELECT * FROM %tablename WHERE id = %d;',
         'select_all'=>'SELECT %fields FROM %tablename;',
         'full_table_name'=>'`%database`.`%table`',
-        'select_join'=>'SELECT master.name FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %itemvalue;',
+        'select_join'=>'SELECT master.name FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %itemvalue;',                        
+        'select_join_detail'=>'SELECT master.*, detail.* FROM %detailtable AS detail INNER JOIN %mastertable AS master ON detail.%detailfield_id = master.id WHERE detail.%detailfield_id = %itemvalue;', 
         'select_join_all'=>'SELECT master.*, detail.* FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %itemvalue;',
         'delete_where'=>'DELETE FROM %tablename WHERE %attr;',
+        'select_fields_where'=>'SELECT %fields FROM %tablename WHERE %where;',
     ];
     public static function get($key, $data=array()) {
         if (!array_key_exists($key, SQLTemplates::$sql_map)) CoreUtils::log("Invalid key -> ". $key);

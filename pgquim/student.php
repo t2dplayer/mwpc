@@ -36,8 +36,14 @@ class Student extends TableBase {
             'paper',
         ];
         $this->detail_fields = [
-            'skill',
-            'paper',
+            'skill'=>FormUtils::TableMultiSelectField(
+                'student', 
+                'student_has_skill'
+            ),
+            'paper'=>FormUtils::DetailTableMultiSelectField(
+                'student', 
+                'student_has_paper'
+            ),
         ];
         $this->defaults = CoreUtils::merge($this->fields, [
             0, 
@@ -67,21 +73,20 @@ class Student extends TableBase {
                 'fields'=>['id', 'name'],
             ]),
             FormUtils::DetailTableMultiSelect([
-                'table_name'=>'paper',
+                'foreign_key'=>'student_id',
+                'table_name'=>'student_has_paper',
                 'fields'=>['id', 'name', 'year'],
                 'combobox'=>[
-                    [
-                        'label'=>'Artigo Datado',
-                        'value'=>0,
-                        'fields'=>['name'=>"text", 'year'=>'text'],
-                        'type'=>"text",
-                    ],
-                    [
-                        'label'=>'Artigo Não Datado',
-                        'value'=>1,
-                        'fields'=>['name'=>'text'],
-                        'type'=>"text",
-                    ]
+                    FormUtils::ComboboxItem(
+                        'Artigo Datado', 
+                        0, 
+                        ['name'=>"text", 'year'=>'text']
+                    ),
+                    FormUtils::ComboboxItem(
+                        'Artigo Não Datado', 
+                        1, 
+                        ['name'=>"text"]
+                    ),
                 ],
             ]),
         ]);
@@ -108,6 +113,7 @@ class Student extends TableBase {
             `cpf` VARCHAR(255) NULL,
             `email` VARCHAR(255) NULL,
             `type` ENUM('egress', 'coautor', 'graduate', 'mastering', 'phd') NOT NULL,
+            KEY(`cpf`),
             PRIMARY KEY  (`id`))
           ENGINE = InnoDB;";
         $this->sql =  TemplateUtils::t($sql_string, [
@@ -142,6 +148,12 @@ class Student extends TableBase {
         ]);
     }
     public function column_paper($item) {
-        return "-";
+        return DatabaseUtils::inner_join_field([
+            '%detailtable'=>'mwpc_student_has_paper',
+            '%mastertable'=>'mwpc_student',
+            '%detailfield'=>'student',
+            '%itemfield'=>'student',
+            '%itemvalue'=>$item['id'],
+        ], 'name');
     }     
 };

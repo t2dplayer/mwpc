@@ -27,6 +27,16 @@ class DatabaseUtils {
         }
         return $str;
     }
+    public static function inner_join_field($item, $output_field) {
+        global $wpdb;
+        $sql = SQLTemplates::_self()->get('select_join_all', $item);
+        $results = $wpdb->get_results($sql);
+        $str = "";
+        foreach ($results as $r) {
+            $str .= '<em>'. $r->$output_field .'</em></br>';
+        }
+        return $str;
+    }    
     public static function inner_join_all($item) {
         global $wpdb;
         $sql = SQLTemplates::_self()->get('select_join_all', $item);        
