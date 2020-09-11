@@ -119,7 +119,7 @@ function get_detail_table(&$item) {
 }
 
 function save_sub_item(&$table, &$table_name, &$detail, &$item) {
-    foreach($table->detail_fields as $first_key=>$data) {  
+    foreach($table->detail_fields as $first_key=>$data) {          
         $detail_table_name = $table_name . "_has_" .$first_key;
         if (key_exists($first_key, $detail)) {
             foreach($detail[$first_key] as $d) {
@@ -127,8 +127,9 @@ function save_sub_item(&$table, &$table_name, &$detail, &$item) {
                     'user_id'=>get_current_user_id(),
                     $table->project_settings['id'] . '_id'=>$item['id'],
                 ];
-                $obj = explode(";", $d);
-                if (sizeof($obj) > 1) {
+                $keyvalue = explode(":", $d);                 
+                if (sizeof($keyvalue) > 1) {
+                    $obj = explode(";", $d);
                     foreach($obj as $o) {
                         $arr = explode(":", $o);
                         if (sizeof($arr) == 2) {
@@ -141,8 +142,8 @@ function save_sub_item(&$table, &$table_name, &$detail, &$item) {
                 $r = insert_item($detail_table_name, $sub_item);
             }
         } else {
-            // CoreUtils::log($detail);
-            // CoreUtils::log($item);
+            CoreUtils::log($detail);
+            CoreUtils::log($item);
         }
     }
 }

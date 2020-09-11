@@ -20,16 +20,16 @@
 -->
 <div id="table-mwpc-wrapper-%id">
   <div id="table-mwpc-scroll-%id">
-    <table class="wp-list-table widefat fixed striped table-view-list">
+    <table class="wp-list-table widefat striped table-view-list">
         <thead>
             <tr>
-                <th class="manage-column check-column" scope="col"></th>
+                <th style="width:5%" class="manage-column check-column" scope="col"></th>
                 %columns
             </tr>
         </thead>
         <tbody id="mwpc-table-%id">
             <tr></tr>
-            %rows        
+            %rows             
         </tbody>
     </table>
   </div>

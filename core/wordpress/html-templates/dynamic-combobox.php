@@ -29,7 +29,7 @@
                 }
                 if (validated) {
                     let itemid = this.getAttribute("itemid");
-                    let row = "<tr>";
+                    let row = '<tr id="mwpc-detail-unsaved-row-%id-' + itemid + '">';
                     key = "";
                     for (i=0; i<objects.length;++i) {
                         key += objects[i].id + ':' + objects[i].value;
@@ -39,9 +39,20 @@
                     for (i=0; i<objects.length;++i) {                            
                         row += '<td>' + objects[i].value + '</td>';
                     }
+                    row += '<td><div id="mwpc-delete-' + itemid + '" itemid="' + itemid + '" class="button action">Apagar</div></td>';
                     row += "</tr>";
-                    console.log(row);
+                    str_delete = `
+                    <script>
+                    jQuery(document).ready(function ($) {
+                        $("#mwpc-delete-` + itemid + `").click(function() {
+                            console.log(this.getAttribute('itemid'));
+                            $("#mwpc-detail-unsaved-row-%id-` + this.getAttribute("itemid") + `").remove();
+                        });
+                    });
+                    <\/script>
+                    `;
                     $("#mwpc-table-%id tr:last").after(row);
+                    $("#mwpc-table-%id").after(str_delete);
                     $('#mwpc-item-%id-' + this.getAttribute("itemid")).remove();
                 }
             });             

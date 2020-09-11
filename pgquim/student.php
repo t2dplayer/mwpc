@@ -75,6 +75,7 @@ class Student extends TableBase {
             FormUtils::DetailTableMultiSelect([
                 'foreign_key'=>'student_id',
                 'table_name'=>'student_has_paper',
+                'checkbox_id'=>'paper',
                 'fields'=>['id', 'name', 'year'],
                 'combobox'=>[
                     FormUtils::ComboboxItem(

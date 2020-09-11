@@ -20,10 +20,10 @@
 -->
 <div id="table-mwpc-wrapper">
   <div id="table-mwpc-scroll">
-    <table class="wp-list-table widefat fixed striped table-view-list">
+    <table class="wp-list-table widefat striped table-view-list">
         <thead>
             <tr>
-                <th class="manage-column check-column" scope="col"></th>
+                <th style="width:5%" class="manage-column check-column" scope="col"></th>
                 %columns
             </tr>
         </thead>

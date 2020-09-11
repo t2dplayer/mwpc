@@ -201,18 +201,30 @@ class FormUtils {
                     '%label'=>MWPCLocale::get($field),
                 ]);
             }
+            $columns .= '<th style="width:5%" class="manage-column check-column" scope="col"></th>';
             foreach($get_results as $row) {
-                $rows .= "<tr>";
-                $rows .= HTMLTemplates::_self()->get('th_scope', [
-                    '%id'=>$options['table_name'] . "[]",
-                    '%value'=>$row['id'],
-                    '%checked'=>'',
-                ]);                
+                $rows .= '<tr id="mwpc-detail-row-'. $options['checkbox_id'] . '-' . $row['id'] . '">';
+                $str = "";
+                $counter = 0;
+                foreach ($row as $key=>$value) {
+                    $str .= $key . ":" . $value;
+                    if ($counter++ < sizeof($row) - 1) {
+                        $str .= ";";
+                    }
+                }
+                $rows .= HTMLTemplates::_self()->get('th_hidden', [
+                    '%id'=>$options['checkbox_id'] . "[]",
+                    '%value'=>$str,
+                ]);
                 foreach ($row as $r) {
                     $rows .= HTMLTemplates::_self()->get('td', [
                         '%value'=>$r,
                     ]);
                 }
+                $rows .= HTMLTemplates::_self()->get('delete_button', [
+                    '%label'=>MWPCLocale::get('delete'),
+                    '%itemid'=>$row['id'],
+                ]);
                 $rows .= "<tr />";
             }
             $html = HTMLTemplates::_self()->get('detail_table_multiselect', [

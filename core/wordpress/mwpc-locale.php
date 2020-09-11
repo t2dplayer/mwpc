@@ -22,6 +22,7 @@ class MWPCLocale {
         'invalid_email'=>'E-mail inválido!',
         'search'=>'Buscar',
         'year'=>'Ano',
+        'delete'=>'Apagar',
     ];
     public static function get($key) {
         if (!array_key_exists($key, MWPCLocale::$message_map)) CoreUtils::log("Invalid key -> ". $key);
