@@ -20,6 +20,52 @@ class Student extends TableBase {
         'phd'=>'Doutorado',
         'external'=>'Colaborador Externo',
     );
+    protected function make_skill() {
+        $skill_closure = function($arr, &$item) {
+            $result['student_id']=$item['id'];
+            $result['skill_id']=$arr[0];
+            return $result;
+        };
+        $this->push_detail_field('skill', 
+            FormDetailUtils::InsertData('mwpc_student_has_skill', $skill_closure)
+        );
+        $this->push_detail_field('skill', 
+            FormDetailUtils::SelectData(FormUtils::DataSQLJoinAll(
+                'student', 
+                'student_has_skill'
+            ))
+        );
+        $this->push_detail_field('skill', 
+            FormDetailUtils::DeleteData('mwpc_student_has_skill', $skill_closure)
+        );
+    }
+    protected function make_paper() {
+        $this->push_detail_field('paper', 
+            FormDetailUtils::InsertData('mwpc_student_has_paper',
+                function($arr, &$item){
+                    $result['student_id']=$item['id'];
+                    $result['name']=$arr['name'];
+                    $result['year']=$arr['year'];
+                    return $result;
+                }
+            )
+        );
+        $this->push_detail_field('paper', 
+            FormDetailUtils::SelectData(FormUtils::DataSQLJoinDetail(
+                'student', 
+                'student_has_paper',
+                'student'
+            ))
+        );
+        $this->push_detail_field('paper', 
+            FormDetailUtils::DeleteData('mwpc_student_has_paper',
+                function($arr, &$item){
+                    $result['student_id']=$item['id'];
+                    return $result;
+                }
+            )
+        );
+    }
     function __construct($table_name) {
         parent::__construct(array(
             'singular' => 'student',
@@ -35,7 +81,11 @@ class Student extends TableBase {
             'email', 
             'type',
             'thesis_name', 
+            'skill',
+            'paper',
         ];
+        $this->make_skill();
+        $this->make_paper();
         $this->defaults = CoreUtils::merge($this->fields, [
             0, 
             get_current_user_id(), 
@@ -43,6 +93,8 @@ class Student extends TableBase {
             '', 
             '', 
             'graduate',
+            '',
+            '',
             '',
         ]);
         $this->fields_types = CoreUtils::merge($this->fields, [
@@ -59,6 +111,28 @@ class Student extends TableBase {
             FormUtils::Input('email', 'Digite um E-mail válido aqui', ''),
             FormUtils::SelectFromArray(['enum'=>Student::$types, 'selected_key'=>'type']),
             FormUtils::Input('text', 'Digite o nome da tese/dissertação aqui', '', 512),
+            FormUtils::TableMultiSelect([
+                'table_name'=>'skill',
+                'fields'=>['id', 'name'],
+            ]),
+            FormUtils::DynamicTableMasterDetail([
+                'foreign_key'=>'student_id',
+                'table_name'=>'student_has_paper',
+                'checkbox_id'=>'paper',
+                'fields'=>['id', 'name', 'year'],
+                'combobox'=>[
+                    FormUtils::ComboboxItem(
+                        'Artigo Datado', 
+                        0, 
+                        ['name'=>"text", 'year'=>'text']
+                    ),
+                    FormUtils::ComboboxItem(
+                        'Artigo Não Datado', 
+                        1, 
+                        ['name'=>"text"]
+                    ),
+                ],
+            ]),
         ]);
         $this->labels = CoreUtils::merge($this->fields, [
             MWPCLocale::get('id'),
@@ -68,9 +142,11 @@ class Student extends TableBase {
             MWPCLocale::get('email'),
             MWPCLocale::get('type'),
             "Título da Tese/Dissertação",
+            "Habilidades",
+            "Artigos",
         ]);
         $this->is_sortable = CoreUtils::merge($this->fields,[
-            false, false, true, false, false, true, false
+            false, false, true, false, false, true, false, false, false
         ]);
     }
     public function make_sql() {
@@ -114,4 +190,22 @@ class Student extends TableBase {
         }
         return CoreUtils::mask("###.###.###-##", $cpf);
     }
+    public function column_skill($item) {
+        return DatabaseUtils::inner_join([
+            '%detailtable'=>'mwpc_student_has_skill',
+            '%mastertable'=>'mwpc_skill',
+            '%detailfield'=>'skill',
+            '%itemfield'=>'student',
+            '%itemvalue'=>$item['id'],
+        ]);
+    }
+    public function column_paper($item) {
+        return DatabaseUtils::inner_join_field([
+            '%detailtable'=>'mwpc_student_has_paper',
+            '%mastertable'=>'mwpc_student',
+            '%detailfield'=>'student',
+            '%itemfield'=>'student',
+            '%itemvalue'=>$item['id'],
+        ], 'name');
+    }     
 };

@@ -18,9 +18,6 @@ function your_project_objects() {
     require_once 'pgquim/header.php';
     Settings::_self()->add_objects([
         'student'=>new Student('student'),
-        'skill'=>new Skill('skill'),
-        'student_has_skill'=>new StudentHasSkill('student_has_skill'),
-        'paper'=>new Paper('student_has_paper'),
         'researchline'=>new ResearchLine('researchline'),
         'project'=>new Project('project'),
         'publishing'=>new Publishing('publishing'),
