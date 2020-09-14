@@ -47,6 +47,7 @@ class HTMLTemplates {
             'input'=>'input',
             'select'=>'select',
             'option'=>'option',
+            'textarea'=>'textarea',
         ] as $key=>$value) {
             $this->html_map[$key] = file_get_contents($path . 'form-fields/' . $value . ".php"); 
         }

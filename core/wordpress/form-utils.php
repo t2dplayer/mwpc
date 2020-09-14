@@ -10,14 +10,19 @@ class FormUtils {
         ]);
         return ['html'=>$html, 'f'=>null];
     }
+    public static function TextArea($placeholder = "", $rows="4", $cols="50") {
+        $html = HTMLTemplates::_self()->get('textarea', [
+            '%placeholder'=>$placeholder,
+            '%rows'=>$rows,
+            '%cols'=>$cols,
+        ]);
+        return ['html'=>$html, 'f'=>null];
+    }
     public static function SelectFromArray($options=array()) {
         $html = HTMLTemplates::_self()->get('select');
         $f = function($options) {
             $options_html = "";
-            CoreUtils::log($options, "[SELECTARRAY]");
             foreach($options['enum'] as $value=>$label) {
-                CoreUtils::log($options['item'][$options['selected_key']], "[SELECTEDKEY]");
-                CoreUtils::log($value, "[VALUE]");
                 $is_selected = ($options['item'][$options['selected_key']] == $value);
                 $options_html .= HTMLTemplates::_self()->get('option', [
                     '%value'=>$value,
@@ -32,17 +37,26 @@ class FormUtils {
         };
         return ['html'=>$html, 'options'=>$options, 'f'=>$f];
     }
-    public static function SelectFromTable($options=array()) {
+    public static function SelectFromTable($options=array(), $empty = false) {
         $html = HTMLTemplates::_self()->get('select');
+        $options['empty'] = $empty;
         $f = function($options) {
             global $wpdb;
             $options_html = "";
             $rows = $wpdb->get_results($options['sql']);
+            if ($options['empty'] == true) {
+                $options_html .= HTMLTemplates::_self()->get('option', [
+                    '%value'=>"",
+                    '%label'=>"",
+                    "%selected"=>""
+                ]);
+            }
             foreach($rows as $row) {
+                $is_selected = ($options['item'][$options['selected_key']] == $row->value);
                 $options_html .= HTMLTemplates::_self()->get('option', [
                     '%value'=>$row->value,
                     '%label'=>$row->label,
-                    '%selected'=>($options['item'][$options['selected_key']] == $row->value) ? "selected" : "",
+                    '%selected'=>($is_selected == true) ? "selected" : "",
                 ]);
             }
             $html = HTMLTemplates::_self()->get('select', [

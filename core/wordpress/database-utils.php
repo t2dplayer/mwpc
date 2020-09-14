@@ -45,6 +45,12 @@ class DatabaseUtils {
         $results = $wpdb->get_results($sql);
         return $results;
     }
+    public static function select_fields_where($options) {
+        global $wpdb;
+        $sql = SQLTemplates::_self()->get('select_fields_where', $options);
+        $results = $wpdb->get_results($sql);
+        return $results;
+    }
 }
 
 
