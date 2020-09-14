@@ -17,6 +17,7 @@ class DatabaseUtils {
         ]);
         return $wpdb->get_var($sql_count);
     }
+    // inner_join is used at creating column in listing table
     public static function inner_join($item) {
         global $wpdb;
         $sql = SQLTemplates::_self()->get('select_join', $item);        
@@ -27,6 +28,7 @@ class DatabaseUtils {
         }
         return $str;
     }
+    // inner_join_field is used at creating a column in table listing values
     public static function inner_join_field($item, $output_field) {
         global $wpdb;
         $sql = SQLTemplates::_self()->get('select_join_all', $item);

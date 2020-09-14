@@ -5,6 +5,7 @@ $files = [
     'wordpress/page-handler.php',
     'wordpress/mwpc-locale.php',
     'wordpress/form-utils.php',
+    'wordpress/form-detail-utils.php',
 ];
 foreach($files as $f) {
     require_once WP_PLUGIN_DIR . '/mwpc/core/' . $f;
@@ -18,33 +19,84 @@ class Student extends TableBase {
         'mastering'=>'Mestrado', 
         'phd'=>'Doutorado',
     );
+    protected function make_skill() {
+        $skill_closure = function($arr, &$item) {
+            $result['student_id']=$item['id'];
+            $result['skill_id']=$arr[0];
+            return $result;
+        };
+        // $skill_closure = null;
+        $this->push_detail_field('skill', 
+            FormDetailUtils::InsertData('mwpc_student_has_skill', $skill_closure)
+        );
+        $this->push_detail_field('skill', 
+            FormDetailUtils::SelectData(FormUtils::DataSQLJoinAll(
+                'student', 
+                'student_has_skill'
+            ))
+        );
+        $this->push_detail_field('skill', 
+            FormDetailUtils::DeleteData('mwpc_student_has_skill', $skill_closure)
+        );
+    }
+    protected function make_paper() {
+        $this->push_detail_field('paper', 
+            FormDetailUtils::InsertData('mwpc_student_has_paper',
+                function($arr, &$item){
+                    $result['student_id']=$item['id'];
+                    $result['name']=$arr['name'];
+                    $result['year']=$arr['year'];
+                    return $result;
+                }
+            )
+        );
+        $this->push_detail_field('paper', 
+            FormDetailUtils::SelectData(FormUtils::DataSQLJoinDetail(
+                'student', 
+                'student_has_paper',
+                'student'
+            ))
+        );
+        $this->push_detail_field('paper', 
+            FormDetailUtils::DeleteData('mwpc_student_has_paper',
+                function($arr, &$item){
+                    $result['student_id']=$item['id'];
+                    return $result;
+                }
+            )
+        );
+    }
     function __construct($table_name) {
         parent::__construct(array(
             'singular' => 'student',
             'plural' => 'students',
         ), $table_name, Role::ADMIN);
-        $this->configure('Lista de Discentes e Co-autores',
-                         'Discentes, Egressos e Coautores');
+        $this->configure('Lista de Colaboradores',
+                         'Colaboradores');
         $this->fields = [
             'id', 
             'user_id', 
             'name', 
             'cpf', 
             'email', 
-            'type', 
+            'type',
+            'thesis_name', 
             'skill',
             'paper',
         ];
-        $this->detail_fields = [
-            'skill'=>FormUtils::TableMultiSelectField(
-                'student', 
-                'student_has_skill'
-            ),
-            'paper'=>FormUtils::DetailTableMultiSelectField(
-                'student', 
-                'student_has_paper'
-            ),
-        ];
+        $this->make_skill();
+        $this->make_paper();
+        // $this->detail_fields = [
+        //     'skill'=>FormUtils::DataSQLJoinAll(
+        //         'student', 
+        //         'student_has_skill'
+        //     ),
+        //     'paper'=>FormUtils::DataSQLJoinDetail(
+        //         'student', 
+        //         'student_has_paper',
+        //         'student'
+        //     ),
+        // ];
         $this->defaults = CoreUtils::merge($this->fields, [
             0, 
             get_current_user_id(), 
@@ -54,10 +106,11 @@ class Student extends TableBase {
             'graduate',
             '',
             '',
+            '',
         ]);
         $this->fields_types = CoreUtils::merge($this->fields, [
             '',
-            FormUtils::TableSelect([
+            FormUtils::SelectFromTable([
                 'sql'=>SQLTemplates::_self()->get('select_all', [
                     '%fields'=>'id as value, display_name as label',
                     '%tablename'=>'wp_users',
@@ -67,12 +120,13 @@ class Student extends TableBase {
             FormUtils::Input('text', 'Digite o nome aqui'),
             FormUtils::Input('text', 'Digite um CPF válido aqui'),
             FormUtils::Input('email', 'Digite um E-mail válido aqui'),
-            FormUtils::Select(['enum'=>$this->types, 'selected_key'=>'type']),
+            FormUtils::SelectFromArray(['enum'=>$this->types, 'selected_key'=>'type']),
+            FormUtils::Input('text', 'Digite o nome da tese/dissertação aqui'),
             FormUtils::TableMultiSelect([
                 'table_name'=>'skill',
                 'fields'=>['id', 'name'],
             ]),
-            FormUtils::DetailTableMultiSelect([
+            FormUtils::DynamicTableMasterDetail([
                 'foreign_key'=>'student_id',
                 'table_name'=>'student_has_paper',
                 'checkbox_id'=>'paper',
@@ -98,11 +152,12 @@ class Student extends TableBase {
             MWPCLocale::get('cpf'),
             MWPCLocale::get('email'),
             MWPCLocale::get('type'),
+            "Título da Tese/Dissertação",
             "Habilidades",
             "Artigos",
         ]);
         $this->is_sortable = CoreUtils::merge($this->fields,[
-            false, false, true, false, false, true, false, false
+            false, false, true, false, false, true, false, false, false
         ]);
     }
     public function make_sql() {
@@ -113,6 +168,7 @@ class Student extends TableBase {
             `name` VARCHAR(255) NOT NULL,
             `cpf` VARCHAR(255) NULL,
             `email` VARCHAR(255) NULL,
+            `thesis_name` VARCHAR(255) NULL,
             `type` ENUM('egress', 'coautor', 'graduate', 'mastering', 'phd') NOT NULL,
             KEY(`cpf`),
             PRIMARY KEY  (`id`))

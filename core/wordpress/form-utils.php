@@ -10,7 +10,7 @@ class FormUtils {
         ]);
         return ['html'=>$html, 'f'=>null];
     }
-    public static function Select($options=array()) {
+    public static function SelectFromArray($options=array()) {
         $html = HTMLTemplates::_self()->get('select');
         $f = function($options) {
             $options_html = "";
@@ -28,7 +28,7 @@ class FormUtils {
         };
         return ['html'=>$html, 'options'=>$options, 'f'=>$f];
     }
-    public static function TableSelect($options=array()) {
+    public static function SelectFromTable($options=array()) {
         $html = HTMLTemplates::_self()->get('select');
         $f = function($options) {
             global $wpdb;
@@ -64,17 +64,68 @@ class FormUtils {
         }
         return $result;
     }
-    public static function TableMultiSelectField($master, $detail) {
+    public static function DataSQL($sql_template, $master, $detail) {
         $prefix = Settings::_self()->get_prefix();
         return [
-            'sql_template'=>'select_join_all',
-            'data'=>[
+            'sql_template'=>$sql_template,
+            'data'=> [
                 '%detailtable'=>$prefix . $detail,
                 '%mastertable'=>$prefix . $master,
                 '%detailfield'=>$master,
-                '%itemfield'=>$master,
             ]
-        ];
+        ];  
+
+    }
+    // used to show stored values on edit entry form
+    public static function DataSQLJoinAll($master, $detail) {
+        /*
+        'SELECT master.*, detail.* FROM %detailtable as detail 
+        inner join %mastertable as master on detail.%detailfield_id = master.id 
+        where detail.%itemfield_id = %itemvalue;',
+        */
+        $data_sql = FormUtils::DataSQL('select_join_all', $master, $detail);
+        $data_sql['data']['%itemfield'] = $master;
+        return $data_sql;
+    }
+    // used to show stored values on edit entry form
+    public static function DataSQLJoinDetail($master, $detail, $detailfield) {
+        /*
+        SELECT master.*, detail.* FROM %detailtable AS detail 
+        INNER JOIN %mastertable AS master ON detail.%detailfield_id = master.id 
+        WHERE detail.%detailfield_id = %itemvalue;
+        */
+        $data_sql = FormUtils::DataSQL('select_join_detail', $master, $detail);
+        $data_sql['data']['%detailfield'] = $detailfield;
+        return $data_sql;
+    }
+    public static function DataSQLPrepareJoinDetail($master, $detail, $itemfield) {
+        /*
+        SELECT master.*, detail.* FROM %detailtable as detail inner join %mastertable 
+        as master on detail.%detailfield_id = master.id 
+        where detail.%itemfield_id = %d;
+        */
+        $data_sql = FormUtils::DataSQL('prepare_select_join_all', $master, $detail);
+        $data_sql['data']['%itemfield'] = $itemfield;
+        return $data_sql;
+    }
+    public static function DataSQLPrepareJoinDetailFields($master, $detail, $itemfield, $fields = array()) {
+        /*
+        SELECT %fields FROM %detailtable as detail inner join %mastertable 
+        as master on detail.%detailfield_id = master.id 
+        where detail.%itemfield_id = %d;
+        */
+        $data_sql = FormUtils::DataSQL('prepare_select_fields_join_all', $master, $detail);
+        $data_sql['data']['%itemfield'] = $itemfield;
+        $str_fields = "";
+        $counter = 0;
+        foreach($fields as $f) {
+            $str_fields .= "master." . $f;
+            if ($counter++ < sizeof($fields) - 1) {
+                $str_fields .= ", ";
+            }
+        }
+        $data_sql['data']['%fields'] = $str_fields;
+        return $data_sql;
     }
     public static function TableMultiSelect($options=array()) {
         $html = HTMLTemplates::_self()->get('table_multiselect');
@@ -127,12 +178,17 @@ class FormUtils {
             foreach ($options['combobox'] as $arr) {
                 if (!key_exists('fields', $arr)) continue;
                 $jsfields = "";
+                $size = sizeof($arr['fields']);
+                $counter = 0;
                 foreach($arr['fields'] as $field=>$type) {
                     $jsfields .= HTMLTemplates::_self()->get('js_field', [
                         '%label'=>MWPCLocale::get($field),
                         '%type'=>$type,
                         '%id'=>$field,
                     ]);
+                    if (++$counter % 3 == 0) {
+                        $jsfields .= "</tr><tr>";
+                    }
                 }
                 $ifelse .= "if(value==" . $arr['value'] . "){\n";
                 $ifelse .= HTMLTemplates::_self()->get('js_table', [
@@ -163,47 +219,21 @@ class FormUtils {
             'type'=>"text",
         ];
     }
-    public static function DetailTableMultiSelectField($master, $detail) {
-        $prefix = Settings::_self()->get_prefix();
-        return [
-            'sql_template'=>'select_join_detail',
-            'data'=> [
-                '%detailtable'=>$prefix . $detail,
-                '%mastertable'=>$prefix . $master,
-                '%detailfield'=>$master,
-            ]
-        ];  
-    }
-    public static function DetailTableMultiSelect($options=array()) {
-        $html = HTMLTemplates::_self()->get('detail_table_multiselect');
-        $fields = implode(',', $options['fields']);
-        $sql = SQLTemplates::_self()->get("select_fields_where", [
-            '%fields'=>$fields,
-            '%tablename'=>SQLTemplates::_self()->full_table_name($options['table_name']),
-        ]);        
-        $options['sql'] = $sql;
-        $f = function($options) {
-            global $wpdb;
-            $fields = $options['fields'];
-            $options['sql'] = TemplateUtils::t($options['sql'], [
-                '%where'=>'user_id = %d AND '. $options['foreign_key'] . ' = %d'
+    private static function MakeColumns($fields = array()) {
+        $columns = "";
+        foreach($fields as $field) {
+            $columns .= HTMLTemplates::_self()->get('th_column', [
+                '%label'=>MWPCLocale::get($field),
             ]);
-            $sql = $wpdb->prepare(
-                $options['sql'],
-                get_current_user_id(),
-                isset($_REQUEST['id']) ? $_REQUEST['id'] : "0"
-            );
-            $get_results = $wpdb->get_results($sql, ARRAY_A);
-            $columns = "";
-            $rows = "";
-            foreach($fields as $field) {
-                $columns .= HTMLTemplates::_self()->get('th_column', [
-                    '%label'=>MWPCLocale::get($field),
-                ]);
-            }
-            $columns .= '<th style="width:5%" class="manage-column check-column" scope="col"></th>';
+        }
+        $columns .= '<th style="width:5%" class="manage-column check-column" scope="col"></th>';
+        return $columns;
+    }
+    private static function MakeRows(&$get_results, $checkboxid) {
+        $rows = "";
+        if (is_iterable($get_results)) {
             foreach($get_results as $row) {
-                $rows .= '<tr id="mwpc-detail-row-'. $options['checkbox_id'] . '-' . $row['id'] . '">';
+                $rows .= '<tr id="mwpc-detail-row-'. $checkboxid . '-' . $row['id'] . '">';
                 $str = "";
                 $counter = 0;
                 foreach ($row as $key=>$value) {
@@ -213,7 +243,7 @@ class FormUtils {
                     }
                 }
                 $rows .= HTMLTemplates::_self()->get('th_hidden', [
-                    '%id'=>$options['checkbox_id'] . "[]",
+                    '%id'=>$checkboxid . "[]",
                     '%value'=>$str,
                 ]);
                 foreach ($row as $r) {
@@ -227,6 +257,49 @@ class FormUtils {
                 ]);
                 $rows .= "<tr />";
             }
+        } else {
+            CoreUtils::log('Variable is not iterable!');
+        }
+        return $rows;
+    }
+    private static function GetResults(&$options) {
+        global $wpdb;
+        $get_results = $wpdb->get_results($options['sql'], ARRAY_A);
+        return $get_results;
+    }
+    public static function DynamicTableMasterDetail($options=array()) {
+        $html = HTMLTemplates::_self()->get('detail_table_multiselect');        
+        $fields = "";
+        if (key_exists('fields', $options)) {
+            $fields = implode(',', $options['fields']);
+        } else {
+            CoreUtils::log("Error: key 'field' wasn't defined in options");
+        }
+        $table_name = "";
+        if (key_exists('table_name', $options)) {
+            $table_name = SQLTemplates::_self()->full_table_name($options['table_name']);
+        } else {
+            CoreUtils::log("Error: key 'table_name' wasn't defined in options");
+        }
+        $sql = SQLTemplates::_self()->get("select_fields_where", [
+            '%fields'=>$fields,
+            '%tablename'=>$table_name,
+        ]);        
+        $options['sql'] = $sql;
+        $f = function($options) {
+            global $wpdb;
+            $fields = $options['fields'];            
+            $columns = FormUtils::MakeColumns($fields);
+            $options['sql'] = TemplateUtils::t($options['sql'], [
+                '%where'=>'user_id = %d AND '. $options['foreign_key'] . ' = %d'
+            ]);
+            $options['sql'] = $wpdb->prepare(
+                $options['sql'],
+                get_current_user_id(),
+                isset($_REQUEST['id']) ? $_REQUEST['id'] : "0"
+            );
+            $get_results = FormUtils::GetResults($options);
+            $rows = Formutils::MakeRows($get_results, $options['checkbox_id']);
             $html = HTMLTemplates::_self()->get('detail_table_multiselect', [
                 '%searchlabel'=>MWPCLocale::get("search"),
                 '%searchplaceholder'=>MWPCLocale::get("search"),
@@ -237,5 +310,36 @@ class FormUtils {
             return $html;
         };
         return ['html'=>$html, 'options'=>$options, 'f'=>$f];
-    }    
+    }
+    public static function DynamicTableMasterHasDetail($options=array()) {
+        $html = HTMLTemplates::_self()->get('detail_table_multiselect');        
+        /*
+        SELECT master.*, detail.*
+        FROM %detailtable as detail inner join %mastertable as master 
+        on detail.%detailfield_id = master.id where detail.%itemfield_id = %d;        
+        */
+        $prefix = Settings::_self()->get_prefix();
+        $options['sql'] = SQLTemplates::_self()->get("prepare_select_fields_join_all",
+            $options['data_sql']['data']
+        );        
+        $f = function($options) {
+            global $wpdb;            
+            $columns = FormUtils::MakeColumns($options['fields']);
+            $options['sql'] = $wpdb->prepare(
+                $options['sql'],
+                isset($_REQUEST['id']) ? $_REQUEST['id'] : "0"
+            );                                    
+            $get_results = FormUtils::GetResults($options);
+            $rows = Formutils::MakeRows($get_results, $options['checkbox_id']);
+            $html = HTMLTemplates::_self()->get('detail_table_multiselect', [
+                '%searchlabel'=>MWPCLocale::get("search"),
+                '%searchplaceholder'=>MWPCLocale::get("search"),
+                '%columns'=>$columns,
+                '%rows'=>$rows,
+            ]);
+            FormUtils::CreateCombobox($html, $options);
+            return $html;
+        };
+        return ['html'=>$html, 'options'=>$options, 'f'=>$f];
+    }        
 };

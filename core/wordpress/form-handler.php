@@ -5,7 +5,7 @@ function delete_all(&$table_name, $item) {
     $attr = "";
     $counter = 0;
     foreach($item as $key=>$value) {
-        $attr .= "$key = $value";
+        $attr .= "$key = \"$value\"";
         if ($counter++ < sizeof($item) - 1) {
             $attr .= " AND ";            
         }
@@ -17,16 +17,16 @@ function delete_all(&$table_name, $item) {
     $wpdb->query($sql);
 }
 
-function insert_item(&$table_name, &$item) {
+function insert_item(&$table_name, &$data) {
     global $wpdb;
-    $result = $wpdb->insert($table_name, $item);
-    $item['id'] = $wpdb->insert_id;
-    return $item;
+    $result = $wpdb->insert($table_name, $data);
+    $data['id'] = $wpdb->insert_id;
+    return $data;
 }
 
 function update_item(&$table, &$table_name, &$item) {
     global $wpdb;
-    foreach ($table->detail_fields as $value=>$data) {
+    foreach ($table->get_detail_fields() as $value=>$data) {
         unset($item[$value]);
     }
     $wpdb->update($table_name, $item, array('id' => $item['id']));
@@ -118,32 +118,42 @@ function get_detail_table(&$item) {
     return $result;
 }
 
-function save_sub_item(&$table, &$table_name, &$detail, &$item) {
-    foreach($table->detail_fields as $first_key=>$data) {          
-        $detail_table_name = $table_name . "_has_" .$first_key;
-        if (key_exists($first_key, $detail)) {
-            foreach($detail[$first_key] as $d) {
-                $sub_item = [
-                    'user_id'=>get_current_user_id(),
-                    $table->project_settings['id'] . '_id'=>$item['id'],
-                ];
-                $keyvalue = explode(":", $d);                 
-                if (sizeof($keyvalue) > 1) {
-                    $obj = explode(";", $d);
-                    foreach($obj as $o) {
-                        $arr = explode(":", $o);
-                        if (sizeof($arr) == 2) {
-                            $sub_item[$arr[0]] = $arr[1];
-                        }
-                    }
-                } else {
-                    $sub_item[$first_key . "_id"] = $d[0];
-                }
-                $r = insert_item($detail_table_name, $sub_item);
+function explode_items($str) {
+    $result = array();
+    if (sizeof($str) == 0) return $result;
+    $r = explode(";", $str);
+    if (sizeof($r) > 1) {
+        foreach($r as $item) {
+            $arr = explode(":", $item);
+            if (sizeof($arr) == 2) {
+                $result[$arr[0]] = $arr[1];
             }
-        } else {
-            CoreUtils::log($detail);
-            CoreUtils::log($item);
+        }
+    } else {
+        array_push($result, $r[0]);
+    }
+    return $result;
+}
+
+function save_sub_item(&$table, &$table_name, &$detail, &$item) {
+    foreach($table->get_detail_fields() as $key=>$detail_fields) {
+        foreach($detail_fields as $fields) {
+            if (!array_key_exists('insert_data', $fields)) {
+                continue;
+            }
+            $detail_table_name = $fields['insert_data']['table_name'];
+            $closure = $fields['insert_data']['closure'];
+            if (!array_key_exists($key, $detail)) {
+                continue;
+            }
+            foreach($detail[$key] as $str) {
+                if (is_callable($closure)) {
+                    $data = $closure(explode_items($str), $item);
+                    $data['user_id'] = get_current_user_id();
+                    $r_id = insert_item($detail_table_name, $data);
+                    $item[$key."_id"] = $r_id['id'];
+                }
+            }
         }
     }
 }
@@ -155,13 +165,25 @@ function save_or_update(&$table, &$table_name, &$item, &$detail) {
         $sql_command = SQLCommand::Insert;
         $result = insert_item($table_name, $item);
     } else { // updating item
-        foreach($table->detail_fields as $key=>$data) {
-            $options = [
-                'user_id'=>get_current_user_id(),
-                $table->project_settings['id'] . '_id'=>$item['id'],
-            ];
-            $detail_table_name = $table_name . "_has_" .$key;
-            delete_all($detail_table_name, $options);
+        $delete_key = "delete_data";
+        foreach($table->get_detail_fields() as $key=>$detail_fields) {
+            foreach($detail_fields as $fields) {
+                if (!array_key_exists($delete_key, $fields)) {
+                    continue;
+                }
+                $detail_table_name = $fields[$delete_key]['table_name'];
+                $closure = $fields[$delete_key]['closure'];
+                if (!array_key_exists($key, $detail)) {
+                    continue;
+                }
+                foreach($detail[$key] as $str) {
+                    if (is_callable($closure)) {
+                        $data = $closure(explode_items($str), $item);
+                        $data['user_id'] = get_current_user_id();
+                        delete_all($detail_table_name, $data);
+                    }
+                }
+            }
         }
         $sql_command = SQLCommand::Update;
         $result = update_item($table, $table_name, $item);                
@@ -234,16 +256,21 @@ function create_form_handler(&$table) {
     }
     if (isset($result->result['id'])) {
         $prefix = Settings::_self()->get_prefix();
-        $detail_results = [];    
-        foreach ($table->detail_fields as $key=>$value) {
-            $data =$value['data'];
-            $data['%itemvalue'] = $result->result['id'];
-            $sql = SQLTemplates::_self()->get($value['sql_template'], $data);        
-            $detail_results += $wpdb->get_results($sql);
-            $result->result[$key] = $detail_results;
-        }
+        $detail_results = [];
+        $select_key = "select_data";
+        foreach($table->get_detail_fields() as $key=>$detail_fields) {
+            foreach($detail_fields as $fields) {
+                if (!array_key_exists($select_key, $fields)) {
+                    continue;
+                }
+                $data =$fields[$select_key]['data'];
+                $data['%itemvalue'] = $result->result['id'];                
+                $sql = SQLTemplates::_self()->get($fields[$select_key]['sql_template'], $data);
+                $detail_results += $wpdb->get_results($sql);
+                $result->result[$key] = $detail_results;                
+            }
+        }        
     }
-
     $item = $result->result;
     add_meta_box(
         $table->project_settings['meta_box_id'],

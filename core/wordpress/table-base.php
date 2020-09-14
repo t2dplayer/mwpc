@@ -1,8 +1,4 @@
 <?php
-// require_once WP_PLUGIN_DIR .'/mwpc/core/template-utils.php';
-// require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/database-utils.php';
-// require_once WP_PLUGIN_DIR .'/mwpc/core/core-utils.php';
-// require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/settings.php';
 require_once WP_PLUGIN_DIR .'/mwpc/core/wordpress/sql-templates.php';
 require_once 'admin-settings.php'; 
 
@@ -22,7 +18,7 @@ class TableBase extends WP_List_Table {
     public $role = 1;
     public $project_settings = [];  
     public $fields = [];// name of the fields
-    public $detail_fields = [];// setting of detail field
+    protected $detail_fields = [];// setting of detail field
     protected $labels = [];// label to show on insert form
     protected $defaults = [];// default values
     protected $is_sortable = [];
@@ -40,6 +36,15 @@ class TableBase extends WP_List_Table {
         parent::__construct($array);
         $this->make_sql();
         $this->make_handlers();
+    }
+    public function push_detail_field($key, $value) {
+        if (!array_key_exists($key, $this->detail_fields)) {
+            $this->detail_fields[$key] = array();    
+        }
+        array_push($this->detail_fields[$key], $value);
+    }
+    public function get_detail_fields() {
+        return $this->detail_fields;
     }
     private function make_handlers() {
         $_str = '

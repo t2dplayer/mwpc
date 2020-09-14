@@ -21,6 +21,10 @@ function your_project_objects() {
         'skill'=>new Skill('skill'),
         'student_has_skill'=>new StudentHasSkill('student_has_skill'),
         'paper'=>new Paper('student_has_paper'),
+        'researchline'=>new ResearchLine('researchline'),
+        'project'=>new Project('project'),
+        'project_has_researchline'=>new ProjectHasResearchLine('project_has_researchline'),
+        'project_has_student'=>new ProjectHasStudent('project_has_student'),
     ]);
 }
 

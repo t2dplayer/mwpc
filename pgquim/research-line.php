@@ -10,14 +10,14 @@ foreach($files as $f) {
     require_once WP_PLUGIN_DIR . '/mwpc/core/' . $f;
 }
 
-class Skill extends TableBase {
+class ResearchLine extends TableBase {
     function __construct($table_name) {
         parent::__construct(array(
-            'singular' => 'skill',
-            'plural' => 'skills',
+            'singular' => 'researchline',
+            'plural' => 'researchline',
         ), $table_name, Role::ADMIN);
-        $this->configure('Lista de Habilidade',
-                         'Habilidades');
+        $this->configure('Lista de Linhas de Pesquisa',
+                         'Linhas de Pesquisa');
         $this->fields = ['id', 'user_id', 'name'];
         $this->defaults = CoreUtils::merge($this->fields, [
             0, 
@@ -33,7 +33,7 @@ class Skill extends TableBase {
                 ]),
                 'selected_key'=>'id',
             ]),
-            FormUtils::Input('text', 'Digite o nome da habilidade aqui'),
+            FormUtils::Input('text', 'Digite o nome da linha de pesquisa aqui'),
         ]);
         $this->labels = CoreUtils::merge($this->fields, [
             MWPCLocale::get('id'),
