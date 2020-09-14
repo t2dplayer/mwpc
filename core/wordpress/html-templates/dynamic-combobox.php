@@ -35,10 +35,19 @@
                         key += objects[i].id + ':' + objects[i].value;
                         if (i < objects.length - 1) key += ";";
                     }
+                    let select_objects = $('tbody#mwpc-detail-body-%id tr td select');
+                    for (i=0; i<select_objects.length;++i) {
+                        if (objects.length > 0 && i === 0) key += ";";
+                        key += select_objects[i].id + ':' + select_objects[i].value;
+                        if (i < select_objects.length - 1) key += ";";
+                    }                    
                     row += '<td></td><td><input type="hidden" name="%id[]" value="' + key + '"></td>';
                     for (i=0; i<objects.length;++i) {                            
                         row += '<td>' + objects[i].value + '</td>';
                     }
+                    for (i=0; i<select_objects.length;++i) {
+                        row += '<td>' + select_objects[i].value + '</td>';
+                    }                     
                     row += '<td><div id="mwpc-delete-' + itemid + '" itemid="' + itemid + '" class="button action">Apagar</div></td>';
                     row += "</tr>";
                     str_delete = `

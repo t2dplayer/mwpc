@@ -209,7 +209,15 @@ function post(&$table, &$table_name, &$item) {
     }
     $success = true;
     if ($success) {
+        global $wpdb;
+        $result = array();
+        $wpdb->query("START TRANSACTION");
         $result = save_or_update($table, $table_name, $item, $detail);
+        if ($wpdb->last_error !== '') {
+            $wpdb->query("ROLLBACK");
+        } else {
+            $wpdb->query("COMMIT");
+        }
     } else {
         if (sizeof($validate_result) > 0) {
             foreach ($validate_result as $arr) {
@@ -219,7 +227,7 @@ function post(&$table, &$table_name, &$item) {
             }
         }        
     }
-    if (!isset($result)) {
+    if ($wpdb->last_error !== '') {
         $status = Status::Error;
     } else { 
         $status = Status::Success;

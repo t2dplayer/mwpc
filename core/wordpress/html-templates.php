@@ -34,6 +34,7 @@ class HTMLTemplates {
             'dynamic_combobox',
             'dynamic_option',
             'js_field',
+            'js_field_select',
             'js_table',
             'th_hidden',
             'delete_button',

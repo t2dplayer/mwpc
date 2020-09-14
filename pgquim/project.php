@@ -9,6 +9,8 @@ $files = [
 foreach($files as $f) {
     require_once WP_PLUGIN_DIR . '/mwpc/core/' . $f;
 }
+require_once 'student.php';
+
 
 class Project extends TableBase {
     protected $types = array(
@@ -17,7 +19,6 @@ class Project extends TableBase {
         'new'=>'Novo',
         'disabled'=>'Desativado',
     );
-
     protected function make_researchline() {
         $closure = function($arr, &$item) {
             $result['project_id']=$item['id'];
@@ -139,7 +140,16 @@ class Project extends TableBase {
                     FormUtils::ComboboxItem(
                         'Discente', 
                         0, 
-                        ['name'=>"text", 'email'=>'email', 'cpf'=>'text', 'thesis_name'=>'text', 'type'=>'text']
+                        [
+                            'name'=>"text",
+                            'email'=>'email',
+                            'cpf'=>'text',
+                            'thesis_name'=>'text',
+                            'type'=>[
+                                'type'=>'select',
+                                'enum'=>Student::$types
+                            ]
+                        ]
                     ),
                     FormUtils::ComboboxItem(
                         'Colaborador', 
@@ -167,7 +177,7 @@ class Project extends TableBase {
             `id` INT NOT NULL AUTO_INCREMENT,
             `user_id` INT NOT NULL,
             `name` VARCHAR(255) NOT NULL,
-            `status` ENUM('remain', 'finished', 'new', 'disabled') NOT NULL,
+            `status` ENUM('remain', 'finished', 'new', 'disabled') DEFAULT 'remain',
             PRIMARY KEY  (`id`))
           ENGINE = InnoDB;";
         $this->sql =  TemplateUtils::t($sql_string, [

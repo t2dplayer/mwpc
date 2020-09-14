@@ -23,8 +23,10 @@ function your_project_objects() {
         'paper'=>new Paper('student_has_paper'),
         'researchline'=>new ResearchLine('researchline'),
         'project'=>new Project('project'),
+        'publishing'=>new Publishing('publishing'),
         'project_has_researchline'=>new ProjectHasResearchLine('project_has_researchline'),
         'project_has_student'=>new ProjectHasStudent('project_has_student'),
+        'project_has_publishing'=>new ProjectHasPublishing('project_has_publishing'),
     ]);
 }
 

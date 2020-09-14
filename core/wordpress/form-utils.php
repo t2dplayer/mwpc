@@ -14,11 +14,15 @@ class FormUtils {
         $html = HTMLTemplates::_self()->get('select');
         $f = function($options) {
             $options_html = "";
+            CoreUtils::log($options, "[SELECTARRAY]");
             foreach($options['enum'] as $value=>$label) {
+                CoreUtils::log($options['item'][$options['selected_key']], "[SELECTEDKEY]");
+                CoreUtils::log($value, "[VALUE]");
+                $is_selected = ($options['item'][$options['selected_key']] == $value);
                 $options_html .= HTMLTemplates::_self()->get('option', [
                     '%value'=>$value,
                     '%label'=>$label,
-                    '%selected'=>($options['item'][$options['selected_key']] == $value) ? "selected" : "",
+                    '%selected'=> ($is_selected == true) ? "selected" : "",
                 ]);
             }
             $html = HTMLTemplates::_self()->get('select', [
@@ -180,12 +184,28 @@ class FormUtils {
                 $jsfields = "";
                 $size = sizeof($arr['fields']);
                 $counter = 0;
+                $jsfields = "";
                 foreach($arr['fields'] as $field=>$type) {
-                    $jsfields .= HTMLTemplates::_self()->get('js_field', [
-                        '%label'=>MWPCLocale::get($field),
-                        '%type'=>$type,
-                        '%id'=>$field,
-                    ]);
+                    if (is_array($type)) {
+                        $enum = "";
+                        foreach($type['enum'] as $k=>$v) {
+                            $enum .= HTMLTemplates::_self()->get('dynamic_option', [
+                                '%value'=>$k,
+                                '%label'=>$v
+                            ]);
+                        }
+                        $jsfields .= HTMLTemplates::_self()->get('js_field_' . $type['type'], [
+                            '%label'=>MWPCLocale::get($field),
+                            '%options'=>$enum,
+                            '%id'=>$field,
+                        ]);                        
+                    } else {
+                        $jsfields .= HTMLTemplates::_self()->get('js_field', [
+                            '%label'=>MWPCLocale::get($field),
+                            '%type'=>$type,
+                            '%id'=>$field,
+                        ]);
+                    }
                     if (++$counter % 3 == 0) {
                         $jsfields .= "</tr><tr>";
                     }

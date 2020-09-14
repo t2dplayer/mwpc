@@ -12,12 +12,13 @@ foreach($files as $f) {
 }
 
 class Student extends TableBase {
-    protected $types = array(
+    static public $types = array(
         'egress'=>'Egresso', 
         'coautor'=>'Co-Autor', 
         'graduate'=>'Graduação', 
         'mastering'=>'Mestrado', 
         'phd'=>'Doutorado',
+        'external'=>'Colaborador Externo',
     );
     protected function make_skill() {
         $skill_closure = function($arr, &$item) {
@@ -25,7 +26,6 @@ class Student extends TableBase {
             $result['skill_id']=$arr[0];
             return $result;
         };
-        // $skill_closure = null;
         $this->push_detail_field('skill', 
             FormDetailUtils::InsertData('mwpc_student_has_skill', $skill_closure)
         );
@@ -86,17 +86,6 @@ class Student extends TableBase {
         ];
         $this->make_skill();
         $this->make_paper();
-        // $this->detail_fields = [
-        //     'skill'=>FormUtils::DataSQLJoinAll(
-        //         'student', 
-        //         'student_has_skill'
-        //     ),
-        //     'paper'=>FormUtils::DataSQLJoinDetail(
-        //         'student', 
-        //         'student_has_paper',
-        //         'student'
-        //     ),
-        // ];
         $this->defaults = CoreUtils::merge($this->fields, [
             0, 
             get_current_user_id(), 
@@ -118,10 +107,10 @@ class Student extends TableBase {
                 'selected_key'=>'id',
             ]),
             FormUtils::Input('text', 'Digite o nome aqui'),
-            FormUtils::Input('text', 'Digite um CPF válido aqui'),
-            FormUtils::Input('email', 'Digite um E-mail válido aqui'),
-            FormUtils::SelectFromArray(['enum'=>$this->types, 'selected_key'=>'type']),
-            FormUtils::Input('text', 'Digite o nome da tese/dissertação aqui'),
+            FormUtils::Input('text', 'Digite um CPF válido aqui', '', 14),
+            FormUtils::Input('email', 'Digite um E-mail válido aqui', ''),
+            FormUtils::SelectFromArray(['enum'=>Student::$types, 'selected_key'=>'type']),
+            FormUtils::Input('text', 'Digite o nome da tese/dissertação aqui', '', 512),
             FormUtils::TableMultiSelect([
                 'table_name'=>'skill',
                 'fields'=>['id', 'name'],
@@ -168,8 +157,8 @@ class Student extends TableBase {
             `name` VARCHAR(255) NOT NULL,
             `cpf` VARCHAR(255) NULL,
             `email` VARCHAR(255) NULL,
-            `thesis_name` VARCHAR(255) NULL,
-            `type` ENUM('egress', 'coautor', 'graduate', 'mastering', 'phd') NOT NULL,
+            `thesis_name` VARCHAR(512) NULL,
+            `type` ENUM('egress', 'coautor', 'graduate', 'mastering', 'phd', 'external') DEFAULT 'external',
             KEY(`cpf`),
             PRIMARY KEY  (`id`))
           ENGINE = InnoDB;";
@@ -190,10 +179,16 @@ class Student extends TableBase {
         ];
     }
     public function column_type($item) {
-        return $this->types[$item['type']];
+        return Student::$types[$item['type']];
     }
     public function column_cpf($item) {
-        return CoreUtils::mask("###.###.###-##", $item['cpf']);
+        if (!array_key_exists('cpf', $item)) return '-';
+        $cpf = $item['cpf'];
+        if (strlen($item['cpf']) == 0) return '-';
+        if (strlen($cpf) != 11) {
+            $cpf = str_replace([".", "-", ",", ";"], '', $cpf);
+        }
+        return CoreUtils::mask("###.###.###-##", $cpf);
     }
     public function column_skill($item) {
         return DatabaseUtils::inner_join([
