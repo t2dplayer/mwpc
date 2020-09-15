@@ -25,7 +25,7 @@ class MWPCLocale {
         'delete'=>'Apagar',
         'thesis_name'=>'Título do TCC',
         'doi'=>'DOI',
-        'project_type'=>'Tipo de Projeto',
+        'project_type'=>'Feito em',
         'publishing_type'=>'Tipo',
         'note'=>'Autores',
     ];

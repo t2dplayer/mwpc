@@ -22,7 +22,8 @@
                 let arr_objects = [
                     $('tbody#mwpc-detail-body-%id tr td input'),
                     $('tbody#mwpc-detail-body-%id tr td select'),
-                    $('tbody#mwpc-detail-body-%id tr td textarea')
+                    $('tbody#mwpc-detail-body-%id tr td textarea'),
+                    $('tbody#mwpc-detail-body-%id input[type=hidden]'),
                 ];
                 for (j = 0; j < arr_objects.length; ++j) {
                     let objects = arr_objects[j];
@@ -51,6 +52,7 @@
                     for (j = 0; j < arr_objects.length; ++j) {
                         let objects = arr_objects[j];
                         for (i = 0; i < objects.length;++i) {
+                            if (objects[i].type === "hidden") continue;
                             row += '<td>' + objects[i].value + '</td>';
                         }
                     }

@@ -215,7 +215,10 @@ class FormUtils {
                             '%options'=>$enum,
                             '%id'=>$field,
                             '%value'=>(array_key_exists('value', $type)) ? $type['value'] : "",
-                        ]);                        
+                        ]);
+                        if ($type['type'] == "hidden") {
+                            CoreUtils::log($jsfields, "JSFIELDS");                            
+                        }
                     } else {
                         $jsfields .= HTMLTemplates::_self()->get('js_field', [
                             '%label'=>MWPCLocale::get($field),
@@ -227,7 +230,7 @@ class FormUtils {
                         $jsfields .= "</tr><tr>";
                     }
                 }
-                $ifelse .= "if(value==" . $arr['value'] . "){\n";
+                $ifelse .= "if(value==" . $arr['value'] . "){\n";                
                 $ifelse .= HTMLTemplates::_self()->get('js_table', [
                     '%jsfields'=>$jsfields,
                 ]);
@@ -240,7 +243,7 @@ class FormUtils {
                     '%label'=>$arr['label'],
                 ]);
                 $counter++;
-            }
+            }            
             $html .= HTMLTemplates::_self()->get('dynamic_combobox', [
                 '%options'=>$opt,
                 '%ifelse'=>$ifelse,

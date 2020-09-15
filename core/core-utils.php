@@ -13,7 +13,7 @@ if (!function_exists('array_key_first')) {
 class CoreUtils {
     public static function log($obj, $tag="") {
         $var = $tag;
-        $var .= print_r($obj, true);
+        $var .= htmlspecialchars(print_r($obj, true));
         trigger_error("log(".$var.")", E_USER_NOTICE);
     }
     public static function validate_email($email) {
