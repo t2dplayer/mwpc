@@ -250,7 +250,7 @@ class Project extends TableBase {
             "Status",
             "Linhas de Pesquisa",
             "Equipe",
-            "Publicações ou Patentes"
+            "Artigos ou Patentes"
         ]);
         $this->is_sortable = CoreUtils::merge($this->fields,[
             false, false, true, false, false, false, false
@@ -282,21 +282,22 @@ class Project extends TableBase {
         ]);
     }
     public function column_student($item) {
-        return DatabaseUtils::inner_join([
+        return DatabaseUtils::inner_detail_join([
             '%detailtable'=>'mwpc_project_has_student',
             '%mastertable'=>'mwpc_student',
             '%detailfield'=>'student',
             '%itemfield'=>'project',
             '%itemvalue'=>$item['id'],
-        ]);
+        ], 'student_form_id', "master.id, master.name");
     }
-    public function column_publishing($item) {
-        return DatabaseUtils::inner_detail_join([
+    public function column_publishing($item) {        
+        $html = DatabaseUtils::inner_detail_join([
             '%detailtable'=>SQLTemplates::full_table_name('project_has_publishing'),
             '%mastertable'=>SQLTemplates::full_table_name('project'),
             '%detailfield'=>'project',
             '%itemfield'=>'project',
             '%itemvalue'=>$item['id'],
-        ]);
+        ], 'project_has_publishing_form_id', "detail.id, detail.name");         
+        return $html;
     }
 };

@@ -4,7 +4,7 @@
     </div>
     <h2>
         %title
-        <a class="add-new-h2" href="%link">%back</a>
+        <!--<a class="add-new-h2" href="%link">%back</a>-->
     </h2>
     %notice
     %message

@@ -8,6 +8,17 @@ $data  = [
     '%requestpage'=>'', 
 ];
 -->
+<style>
+    a#mwpc-href {
+        font-weight:normal;
+        color:#555;
+        text-decoration:none;
+    } 
+    a#mwpc-href:hover {
+        text-decoration:underline;
+        font-weight:bold;
+    }
+</style>
 <div class="wrap">
     <div class="icon32 icon32-posts-post" id="icon-edit">
         <br />

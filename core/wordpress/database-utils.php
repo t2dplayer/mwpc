@@ -33,18 +33,34 @@ class DatabaseUtils {
         }
         return $str;
     }
-    public static function inner_detail_join($item) {
+    public static function inner_detail_join($item, $form_id=null, $fields="detail.name") {
         /*
-        SELECT master.name FROM %detailtable as detail inner join %mastertable 
+        SELECT %fields FROM %detailtable as detail inner join %mastertable 
         as master on detail.%detailfield_id = master.id 
         where detail.%itemfield_id = %itemvalue;
         */
-        global $wpdb;
+        global $wpdb;        
+        $url = null;
+        if (isset($form_id)) {
+            $url = HTMLTemplates::_self()->get('edit_link_row', [
+                '%formid'=>$form_id,                
+            ]);
+        }
+        $item['%fields'] = $fields;
         $sql = SQLTemplates::_self()->get('select_detail_join', $item);        
         $results = $wpdb->get_results($sql);
         $str = "";
         foreach ($results as $r) {
-            $str .= '&#9642;<em>'. $r->name .'</em></br>';
+            if (isset($url)) {
+                $str .= '&#9642;';
+                $str .= TemplateUtils::t($url, [
+                    '%itemid'=>$r->id, 
+                    '%content'=>$r->name
+                ]);
+                $str .= '</br>';
+            } else {
+                $str .= '&#9642;<em>'. $r->name .'</em></br>';
+            }
         }
         return $str;
     }

@@ -16,6 +16,7 @@ class HTMLTemplates {
             'div_message',
             'div_error',
             'edit_link',
+            'edit_link_row',
             'form_handler_footer',
             'form_handler_header',
             'input_checkbox',

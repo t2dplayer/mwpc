@@ -109,12 +109,17 @@ class Publishing extends TableBase {
         if (!array_key_exists('project_id', $item)
             || !isset($item['project_id'])) return "-";
         $result = DatabaseUtils::select_fields_where([
-            "%fields"=>"name",
+            "%fields"=>"name, id",
             "%tablename"=>SQLTemplates::full_table_name('project'),
             '%where'=>"id = " . $item['project_id'],
         ]);
         if (sizeof($result) == 0) return "";
-        return $result[0]->name;
+        $url = HTMLTemplates::_self()->get('edit_link_row', [
+            '%formid'=>'project_form_id',
+            '%itemid'=>$result[0]->id,
+            '%content'=>$result[0]->name
+        ]);
+        return $url;
     }
     public function column_project_type($item) {
         if (!array_key_exists('project_type', $item)

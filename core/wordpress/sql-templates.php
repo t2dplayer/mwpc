@@ -16,7 +16,7 @@ class SQLTemplates {
         'select_all'=>'SELECT %fields FROM %tablename;',
         'full_table_name'=>'`%database`.`%table`',
         'select_join'=>'SELECT master.name FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %itemvalue;',
-        'select_detail_join'=>'SELECT detail.name FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %itemvalue;',
+        'select_detail_join'=>'SELECT %fields FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %itemvalue;',
         'select_join_detail'=>'SELECT master.*, detail.* FROM %detailtable AS detail INNER JOIN %mastertable AS master ON detail.%detailfield_id = master.id WHERE detail.%detailfield_id = %itemvalue;', 
         'select_join_all'=>'SELECT master.*, detail.* FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %itemvalue;',
         'prepare_select_join_all'=>'SELECT master.*, detail.* FROM %detailtable as detail inner join %mastertable as master on detail.%detailfield_id = master.id where detail.%itemfield_id = %d;',
