@@ -72,8 +72,6 @@ class Project extends TableBase {
         $this->push_detail_field('student', 
             FormDetailUtils::DeleteData('mwpc_student',
                 function($arr, &$item){
-                    CoreUtils::log($arr, "[ARR]");
-                    CoreUtils::log($item, "[ITEM]");                    
                     $result['id']=$arr['id'];
                     return $result;
                 }
@@ -92,7 +90,9 @@ class Project extends TableBase {
         $this->push_detail_field('publishing', 
             FormDetailUtils::InsertData('mwpc_project_has_publishing',
                 function($arr, &$item){
-                    $result['project_id']=$arr['project_id'];
+                    CoreUtils::log($arr, "[ARR INSERT]");
+                    CoreUtils::log($item, "[ITEM INSERT]");
+                    $result['project_id']=$item['id'];
                     $result['doi']=$arr['doi'];
                     $result['name']=$arr['name'];
                     $result['year']=$arr['year'];
@@ -213,6 +213,10 @@ class Project extends TableBase {
                             ],
                             'note'=>[
                                 'type'=>'textarea'
+                            ],
+                            'project_type'=>[
+                                'type'=>'hidden',
+                                'value'=>'project'
                             ]
                         ]
                     ),
@@ -229,6 +233,10 @@ class Project extends TableBase {
                             ],
                             'note'=>[
                                 'type'=>'textarea'
+                            ],
+                            'project_type'=>[
+                                'type'=>'hidden',
+                                'value'=>'collaboration'
                             ]
                         ]
                     ),

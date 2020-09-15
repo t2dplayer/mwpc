@@ -214,6 +214,7 @@ class FormUtils {
                             '%label'=>MWPCLocale::get($field),
                             '%options'=>$enum,
                             '%id'=>$field,
+                            '%value'=>(array_key_exists('value', $type)) ? $type['value'] : "",
                         ]);                        
                     } else {
                         $jsfields .= HTMLTemplates::_self()->get('js_field', [

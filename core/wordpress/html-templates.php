@@ -36,6 +36,7 @@ class HTMLTemplates {
             'js_field',
             'js_field_select',
             'js_field_textarea',
+            'js_field_hidden',
             'js_table',
             'th_hidden',
             'delete_button',

@@ -154,10 +154,6 @@ function save_sub_item(&$table, &$table_name, &$detail, &$item) {
                 if (is_callable($closure)) {
                     $data = $closure(explode_items($str), $item);
                     $data['user_id'] = get_current_user_id();
-                    if ($detail_table_name == "mwpc_project_has_publishing") {
-                        CoreUtils::log($detail_table_name, "[DETAIL] ");
-                        CoreUtils::log($data, "[DETAIL DATA] ");    
-                    }
                     $r_id = insert_item($detail_table_name, $data);
                     $item[$key."_id"] = $r_id['id'];
                 }
