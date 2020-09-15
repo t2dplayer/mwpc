@@ -89,14 +89,14 @@ class Project extends TableBase {
     protected function make_publishing() {
         $this->push_detail_field('publishing', 
             FormDetailUtils::InsertData('mwpc_project_has_publishing',
-                function($arr, &$item){
-                    CoreUtils::log($arr, "[ARR INSERT]");
-                    CoreUtils::log($item, "[ITEM INSERT]");
-                    $result['project_id']=$item['id'];
+                function($arr, &$item){                    
                     $result['doi']=$arr['doi'];
                     $result['name']=$arr['name'];
                     $result['year']=$arr['year'];
                     $result['project_type']=$arr['project_type'];
+                    if ($result['project_type'] != 'collaboration') {
+                        $result['project_id']=$item['id'];
+                    }
                     $result['publishing_type']=$arr['publishing_type'];
                     $result['note']=$arr['note'];
                     return $result;

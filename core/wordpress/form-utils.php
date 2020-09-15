@@ -216,9 +216,6 @@ class FormUtils {
                             '%id'=>$field,
                             '%value'=>(array_key_exists('value', $type)) ? $type['value'] : "",
                         ]);
-                        if ($type['type'] == "hidden") {
-                            CoreUtils::log($jsfields, "JSFIELDS");                            
-                        }
                     } else {
                         $jsfields .= HTMLTemplates::_self()->get('js_field', [
                             '%label'=>MWPCLocale::get($field),
