@@ -37,7 +37,11 @@ class Project extends TableBase {
         );
         $this->push_detail_field('researchline', 
             FormDetailUtils::DeleteData('mwpc_project_has_researchline', 
-                $closure)
+                function($arr, &$item) {
+                    $result['project_id']=$item['id'];
+                    return $result;
+                }
+            )            
         );
     }
     protected function make_student() {
@@ -93,9 +97,11 @@ class Project extends TableBase {
                     $result['doi']=$arr['doi'];
                     $result['name']=$arr['name'];
                     $result['year']=$arr['year'];
-                    $result['project_type']=$arr['project_type'];
-                    if ($result['project_type'] != 'collaboration') {
-                        $result['project_id']=$item['id'];
+                    if (array_key_exists('project_type', $arr)) {
+                        $result['project_type']=$arr['project_type'];
+                        if ($result['project_type'] != 'collaboration') {
+                            $result['project_id']=$item['id'];
+                        }
                     }
                     $result['publishing_type']=$arr['publishing_type'];
                     $result['note']=$arr['note'];

@@ -327,13 +327,14 @@ class FormUtils {
             global $wpdb;
             $fields = $options['fields'];            
             $columns = FormUtils::MakeColumns($fields);
+            $where = 'user_id = %d AND '. $options['foreign_key'] . ' = %d';
             $options['sql'] = TemplateUtils::t($options['sql'], [
-                '%where'=>'user_id = %d AND '. $options['foreign_key'] . ' = %d'
+                '%where'=>$where
             ]);
             $options['sql'] = $wpdb->prepare(
                 $options['sql'],
                 get_current_user_id(),
-                isset($_REQUEST['id']) ? $_REQUEST['id'] : "0"
+                isset($_REQUEST['id']) ? $_REQUEST['id'] : "-1"
             );
             $get_results = FormUtils::GetResults($options);
             $rows = Formutils::MakeRows($get_results, $options['checkbox_id']);

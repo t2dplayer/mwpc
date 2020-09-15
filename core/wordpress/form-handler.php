@@ -14,7 +14,8 @@ function delete_all(&$table_name, $item) {
         "%tablename"=>$table_name,
         "%attr"=>$attr,
     ]);
-    CoreUtils::log($sql, '[DELETE ALL]');
+    CoreUtils::log($sql, "[delete_all - $table_name - sql]");
+    CoreUtils::log($item, "[delete_all - $table_name - item]");
     $wpdb->query($sql);
 }
 
@@ -34,8 +35,11 @@ function insert_item(&$table_name, &$data) {
 
 function update_item(&$table, &$table_name, &$item) {
     global $wpdb;
+    // Remove all detail table values and update only the master table
     foreach ($table->get_detail_fields() as $value=>$data) {
-        unset($item[$value]);
+        if (array_key_exists($value, $item)) {
+            unset($item[$value]);
+        }
     }
     $wpdb->update($table_name, $item, array('id' => $item['id']));
     return $item;
@@ -109,7 +113,6 @@ function message(&$sql_command, &$sql_status) {
 
 function get_detail_table(&$item) {
     $result = array();
-    CoreUtils::log($item, "[get_detail_table - BEGIN]");
     foreach($item as $key=>$value) {
         if (is_array($value)) {
             $result[$key] = $value;
@@ -118,7 +121,6 @@ function get_detail_table(&$item) {
             unset($item[$key]);
         }
     }
-    CoreUtils::log($item, "[get_detail_table - END]");
     return $result;
 }
 
@@ -166,8 +168,9 @@ function save_sub_item(&$table, &$table_name, &$detail, &$item) {
 
 function save_or_update(&$table, &$table_name, &$item, &$detail) {
     $result = null;
-    // saving new item
-    if ($item['id'] == 0) {
+    // saving new item    
+    if (!array_key_exists('id', $item) 
+        || $item['id'] == 0) {
         $sql_command = SQLCommand::Insert;
         $result = insert_item($table_name, $item);
     } else { // updating item
