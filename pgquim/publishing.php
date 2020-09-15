@@ -31,7 +31,7 @@ class Publishing extends TableBase {
             'id', 
             'user_id',
             'project_id', 
-            'DOI',
+            'doi',
             'name',
             'year', 
             'project_type', 
@@ -92,8 +92,8 @@ class Publishing extends TableBase {
         $sql_string = "CREATE TABLE IF NOT EXISTS %table (
             `id` INT NOT NULL AUTO_INCREMENT,
             `user_id` INT NOT NULL,
-            `project_id` INT NOT NULL,
-            `DOI` VARCHAR(512) NULL,
+            `project_id` INT DEFAULT 0,
+            `doi` VARCHAR(512) NULL,
             `name` VARCHAR(512) NOT NULL,
             `year` YEAR NULL,
             `project_type` ENUM('project', 'collaboration') DEFAULT 'project',
@@ -106,6 +106,8 @@ class Publishing extends TableBase {
         ]);
     }
     public function column_project_id($item) {
+        if (!array_key_exists('project_id', $item)
+            || !isset($item['project_id'])) return "-";
         $result = DatabaseUtils::select_fields_where([
             "%fields"=>"name",
             "%tablename"=>SQLTemplates::full_table_name('project'),
@@ -115,9 +117,13 @@ class Publishing extends TableBase {
         return $result[0]->name;
     }
     public function column_project_type($item) {
+        if (!array_key_exists('project_type', $item)
+            || !isset($item['project_type'])) return "-";
         return Publishing::$project_type[$item['project_type']];
     }
     public function column_publishing_type($item) {
+        if (!array_key_exists('publishing_type', $item)
+            || !isset($item['publishing_type'])) return "-";
         return Publishing::$publishing_type[$item['publishing_type']];
     }
 };

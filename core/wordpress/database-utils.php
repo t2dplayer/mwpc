@@ -19,12 +19,32 @@ class DatabaseUtils {
     }
     // inner_join is used at creating column in listing table
     public static function inner_join($item) {
+        /*
+        SELECT master.name FROM %detailtable as detail inner join %mastertable 
+        as master on detail.%detailfield_id = master.id 
+        where detail.%itemfield_id = %itemvalue;
+        */
         global $wpdb;
         $sql = SQLTemplates::_self()->get('select_join', $item);        
         $results = $wpdb->get_results($sql);
         $str = "";
         foreach ($results as $r) {
-            $str .= '<em>'. $r->name .'</em></br>';
+            $str .= '&#9642;<em>'. $r->name .'</em></br>';
+        }
+        return $str;
+    }
+    public static function inner_detail_join($item) {
+        /*
+        SELECT master.name FROM %detailtable as detail inner join %mastertable 
+        as master on detail.%detailfield_id = master.id 
+        where detail.%itemfield_id = %itemvalue;
+        */
+        global $wpdb;
+        $sql = SQLTemplates::_self()->get('select_detail_join', $item);        
+        $results = $wpdb->get_results($sql);
+        $str = "";
+        foreach ($results as $r) {
+            $str .= '&#9642;<em>'. $r->name .'</em></br>';
         }
         return $str;
     }
@@ -35,7 +55,7 @@ class DatabaseUtils {
         $results = $wpdb->get_results($sql);
         $str = "";
         foreach ($results as $r) {
-            $str .= '<em>'. $r->$output_field .'</em></br>';
+            $str .= '&#9642;<em>'. $r->$output_field .'</em></br>';
         }
         return $str;
     }    

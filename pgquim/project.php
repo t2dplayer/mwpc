@@ -10,7 +10,7 @@ foreach($files as $f) {
     require_once WP_PLUGIN_DIR . '/mwpc/core/' . $f;
 }
 require_once 'student.php';
-
+require_once 'publishing.php';
 
 class Project extends TableBase {
     protected $types = array(
@@ -72,7 +72,9 @@ class Project extends TableBase {
         $this->push_detail_field('student', 
             FormDetailUtils::DeleteData('mwpc_student',
                 function($arr, &$item){
-                    $result['id']=$item['id'];
+                    CoreUtils::log($arr, "[ARR]");
+                    CoreUtils::log($item, "[ITEM]");                    
+                    $result['id']=$arr['id'];
                     return $result;
                 }
             )
@@ -81,6 +83,37 @@ class Project extends TableBase {
             FormDetailUtils::DeleteData('mwpc_project_has_student',
                 function($arr, &$item){
                     $result['project_id']=$item['id'];
+                    return $result;
+                }
+            )
+        );
+    }
+    protected function make_publishing() {
+        $this->push_detail_field('publishing', 
+            FormDetailUtils::InsertData('mwpc_project_has_publishing',
+                function($arr, &$item){
+                    $result['project_id']=$arr['project_id'];
+                    $result['doi']=$arr['doi'];
+                    $result['name']=$arr['name'];
+                    $result['year']=$arr['year'];
+                    $result['project_type']=$arr['project_type'];
+                    $result['publishing_type']=$arr['publishing_type'];
+                    $result['note']=$arr['note'];
+                    return $result;
+                }
+            )
+        );
+        $this->push_detail_field('publishing', 
+            FormDetailUtils::SelectData(FormUtils::DataSQLJoinDetail(
+                'project', // master table
+                'project_has_publishing', // detail table
+                'project' // foreign key in detail table
+            ))
+        );
+        $this->push_detail_field('publishing', 
+            FormDetailUtils::DeleteData('mwpc_project_has_publishing',
+                function($arr, &$item){
+                    $result['id']=$arr['id'];
                     return $result;
                 }
             )
@@ -100,14 +133,17 @@ class Project extends TableBase {
             'status', 
             'researchline',
             'student',
+            'publishing',
         ];
         $this->make_researchline();
         $this->make_student();
+        $this->make_publishing();
         $this->defaults = CoreUtils::merge($this->fields, [
             0, 
             get_current_user_id(), 
             '', 
             'remain', 
+            '',
             '',
             '',
         ]);
@@ -157,7 +193,47 @@ class Project extends TableBase {
                         ['name'=>"text", 'email'=>'email']
                     ),
                 ],
-            ]),   
+            ]),
+            FormUtils::DynamicTableMasterDetail([
+                'foreign_key'=>'project_id',
+                'table_name'=>'project_has_publishing',
+                'checkbox_id'=>'publishing',
+                'fields'=>['id', 'doi', 'name', 'year', 'publishing_type', 'note'],
+                'combobox'=>[
+                    FormUtils::ComboboxItem(
+                        'do Projeto', 
+                        0, 
+                        [
+                            'doi'=>"text",
+                            'name'=>"text",
+                            'year'=>'number', 
+                            'publishing_type'=>[
+                                'type'=>'select',
+                                'enum'=>Publishing::$publishing_type
+                            ],
+                            'note'=>[
+                                'type'=>'textarea'
+                            ]
+                        ]
+                    ),
+                    FormUtils::ComboboxItem(
+                        'de Colaboração', 
+                        1, 
+                        [
+                            'doi'=>"text",
+                            'name'=>"text",
+                            'year'=>'number', 
+                            'publishing_type'=>[
+                                'type'=>'select',
+                                'enum'=>Publishing::$publishing_type
+                            ],
+                            'note'=>[
+                                'type'=>'textarea'
+                            ]
+                        ]
+                    ),
+                ],
+            ]),
         ]);
         $this->labels = CoreUtils::merge($this->fields, [
             MWPCLocale::get('id'),
@@ -166,9 +242,10 @@ class Project extends TableBase {
             "Status",
             "Linhas de Pesquisa",
             "Equipe",
+            "Publicações ou Patentes"
         ]);
         $this->is_sortable = CoreUtils::merge($this->fields,[
-            false, false, true, false, false, false
+            false, false, true, false, false, false, false
         ]);
     }
     public function make_sql() {
@@ -205,5 +282,13 @@ class Project extends TableBase {
             '%itemvalue'=>$item['id'],
         ]);
     }
-
+    public function column_publishing($item) {
+        return DatabaseUtils::inner_detail_join([
+            '%detailtable'=>SQLTemplates::full_table_name('project_has_publishing'),
+            '%mastertable'=>SQLTemplates::full_table_name('project'),
+            '%detailfield'=>'project',
+            '%itemfield'=>'project',
+            '%itemvalue'=>$item['id'],
+        ]);
+    }
 };

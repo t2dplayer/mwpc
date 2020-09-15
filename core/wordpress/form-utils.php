@@ -202,11 +202,13 @@ class FormUtils {
                 foreach($arr['fields'] as $field=>$type) {
                     if (is_array($type)) {
                         $enum = "";
-                        foreach($type['enum'] as $k=>$v) {
-                            $enum .= HTMLTemplates::_self()->get('dynamic_option', [
-                                '%value'=>$k,
-                                '%label'=>$v
-                            ]);
+                        if (array_key_exists('enum', $type)) {
+                            foreach($type['enum'] as $k=>$v) {
+                                $enum .= HTMLTemplates::_self()->get('dynamic_option', [
+                                    '%value'=>$k,
+                                    '%label'=>$v
+                                ]);
+                            }
                         }
                         $jsfields .= HTMLTemplates::_self()->get('js_field_' . $type['type'], [
                             '%label'=>MWPCLocale::get($field),
@@ -271,9 +273,9 @@ class FormUtils {
                 $str = "";
                 $counter = 0;
                 foreach ($row as $key=>$value) {
-                    $str .= $key . ":" . $value;
+                    $str .= $key . "#" . $value;
                     if ($counter++ < sizeof($row) - 1) {
-                        $str .= ";";
+                        $str .= "£";
                     }
                 }
                 $rows .= HTMLTemplates::_self()->get('th_hidden', [

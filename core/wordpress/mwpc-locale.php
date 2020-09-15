@@ -24,6 +24,9 @@ class MWPCLocale {
         'year'=>'Ano',
         'delete'=>'Apagar',
         'thesis_name'=>'Título do TCC',
+        'doi'=>'DOI',
+        'publishing_type'=>'Tipo',
+        'note'=>'Autores',
     ];
     public static function get($key) {
         if (!array_key_exists($key, MWPCLocale::$message_map)) CoreUtils::log("Invalid key -> ". $key);

@@ -14,13 +14,21 @@ function delete_all(&$table_name, $item) {
         "%tablename"=>$table_name,
         "%attr"=>$attr,
     ]);
+    CoreUtils::log($sql, '[DELETE ALL]');
     $wpdb->query($sql);
 }
 
 function insert_item(&$table_name, &$data) {
     global $wpdb;
+    if ($table_name == 'mwpc_project_has_publishing') {
+    }
     $result = $wpdb->insert($table_name, $data);
     $data['id'] = $wpdb->insert_id;
+    if ($wpdb->last_error !== '') {
+        CoreUtils::log($wpdb->last_error, "[INSERT ITEM] ");
+        CoreUtils::log($table_name, "[TABLE NAME] ");
+        CoreUtils::log($data, "[DATA] ");
+    }    
     return $data;
 }
 
@@ -92,15 +100,7 @@ function message(&$sql_command, &$sql_status) {
         || $sql_command == SQLCommand::Select) {            
             return '';
     }
-    $result = "Registro  ";
-    if ($sql_command == SQLCommand::Insert) {
-        $result .= "salvo";
-    } else if ($sql_command == SQLCommand::Update) {
-        $result .= "atualizado";
-    } else if ($sql_command == SQLCommand::Delete) {
-        $result .= "apagado ";
-    }
-    $result .= " com sucesso.";    
+    $result = "Registrado com sucesso.";
     $html = HTMLTemplates::_self()->get('div_message', [
         '%content'=>$result,
     ]);
@@ -109,22 +109,26 @@ function message(&$sql_command, &$sql_status) {
 
 function get_detail_table(&$item) {
     $result = array();
+    CoreUtils::log($item, "[get_detail_table - BEGIN]");
     foreach($item as $key=>$value) {
         if (is_array($value)) {
             $result[$key] = $value;
             unset($item[$key]);
+        } else if (strlen($value) == 0) {
+            unset($item[$key]);
         }
     }
+    CoreUtils::log($item, "[get_detail_table - END]");
     return $result;
 }
 
 function explode_items($str) {
     $result = array();
     if (sizeof($str) == 0) return $result;
-    $r = explode(";", $str);
+    $r = explode("£", $str);
     if (sizeof($r) > 1) {
         foreach($r as $item) {
-            $arr = explode(":", $item);
+            $arr = explode("#", $item);
             if (sizeof($arr) == 2) {
                 $result[$arr[0]] = $arr[1];
             }
@@ -150,6 +154,10 @@ function save_sub_item(&$table, &$table_name, &$detail, &$item) {
                 if (is_callable($closure)) {
                     $data = $closure(explode_items($str), $item);
                     $data['user_id'] = get_current_user_id();
+                    if ($detail_table_name == "mwpc_project_has_publishing") {
+                        CoreUtils::log($detail_table_name, "[DETAIL] ");
+                        CoreUtils::log($data, "[DETAIL DATA] ");    
+                    }
                     $r_id = insert_item($detail_table_name, $data);
                     $item[$key."_id"] = $r_id['id'];
                 }

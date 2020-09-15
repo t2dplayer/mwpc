@@ -35,6 +35,7 @@ class HTMLTemplates {
             'dynamic_option',
             'js_field',
             'js_field_select',
+            'js_field_textarea',
             'js_table',
             'th_hidden',
             'delete_button',

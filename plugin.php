@@ -20,7 +20,7 @@ function your_project_objects() {
         'student'=>new Student('student'),
         'researchline'=>new ResearchLine('researchline'),
         'project'=>new Project('project'),
-        'publishing'=>new Publishing('publishing'),
+        'project_has_publishing'=>new Publishing('project_has_publishing'),
         'project_has_researchline'=>new ProjectHasResearchLine('project_has_researchline'),
         'project_has_student'=>new ProjectHasStudent('project_has_student'),
     ]);
