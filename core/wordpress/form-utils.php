@@ -276,7 +276,7 @@ class FormUtils {
                 foreach ($row as $key=>$value) {
                     $str .= $key . "#" . $value;
                     if ($counter++ < sizeof($row) - 1) {
-                        $str .= "£";
+                        $str .= ";";
                     }
                 }
                 $rows .= HTMLTemplates::_self()->get('th_hidden', [

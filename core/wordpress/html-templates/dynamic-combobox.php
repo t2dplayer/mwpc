@@ -43,9 +43,9 @@
                         let objects = arr_objects[j];
                         for (i = 0; i < objects.length;++i) {
                             key += objects[i].id + "#" + objects[i].value;
-                            if (i < objects.length - 1) key += "£";
+                            if (i < objects.length - 1) key += ";";
                         }
-                        if (j < arr_objects.length - 1) key += "£";
+                        if (j < arr_objects.length - 1) key += ";";
                     }
                     row += '<td></td><td><input type="hidden" name="%id[]" value="' + key + '"></td>';
                     for (j = 0; j < arr_objects.length; ++j) {

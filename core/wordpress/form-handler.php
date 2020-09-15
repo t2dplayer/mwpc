@@ -125,11 +125,13 @@ function get_detail_table(&$item) {
 function explode_items($str) {
     $result = array();
     if (sizeof($str) == 0) return $result;
-    $r = explode("£", $str);
+    $r = explode(";", $str);
     if (sizeof($r) > 1) {
         foreach($r as $item) {
             $arr = explode("#", $item);
             if (sizeof($arr) == 2) {
+                $arr[0] = CoreUtils::clean($arr[0]);
+                $arr[1] = CoreUtils::clean($arr[1]);
                 $result[$arr[0]] = $arr[1];
             }
         }

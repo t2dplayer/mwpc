@@ -60,4 +60,7 @@ class CoreUtils {
         }
         return $mask;
     }
+    public static function clean($string) {
+        return preg_replace('/[#;]/', '', $string);
+    } 
 }
