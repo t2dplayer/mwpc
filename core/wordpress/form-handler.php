@@ -14,15 +14,14 @@ function delete_all(&$table_name, $item) {
         "%tablename"=>$table_name,
         "%attr"=>$attr,
     ]);
-    CoreUtils::log($sql, "[delete_all - $table_name - sql]");
-    CoreUtils::log($item, "[delete_all - $table_name - item]");
+    // CoreUtils::log($sql, "[delete_all - $table_name - sql]");
+    // CoreUtils::log($item, "[delete_all - $table_name - item]");
     $wpdb->query($sql);
 }
 
 function insert_item(&$table_name, &$data) {
     global $wpdb;
-    if ($table_name == 'mwpc_project_has_publishing') {
-    }
+    // CoreUtils::log($data, "INSERT_ITEM [$table_name] -> ");
     $result = $wpdb->insert($table_name, $data);
     $data['id'] = $wpdb->insert_id;
     if ($wpdb->last_error !== '') {
@@ -121,7 +120,17 @@ function get_detail_table(&$item) {
             unset($item[$key]);
         }
     }
-    return $result;
+    return sizeof($result) > 0 ? $result : null;
+}
+
+function get_delete_command(&$request) {
+    $result = array();
+    foreach($request as $key=>$value) {
+        if (preg_match('/delete_(.*)/', $key) == 1) {
+            $result[$key] = $value;
+        }
+    }
+    return sizeof($result) > 0 ? $result : null;
 }
 
 function explode_items($str) {
@@ -156,7 +165,10 @@ function save_sub_item(&$table, &$table_name, &$detail, &$item) {
             }
             foreach($detail[$key] as $str) {
                 if (is_callable($closure)) {
-                    $data = $closure(explode_items($str), $item);
+                    $exploded = explode_items($str);
+                    if (array_key_exists('id', $exploded)
+                        && isset($exploded['id'])) continue;
+                    $data = $closure($exploded, $item);
                     $data['user_id'] = get_current_user_id();
                     $r_id = insert_item($detail_table_name, $data);
                     $item[$key."_id"] = $r_id['id'];
@@ -166,40 +178,45 @@ function save_sub_item(&$table, &$table_name, &$detail, &$item) {
     }
 }
 
-function save_or_update(&$table, &$table_name, &$item, &$detail) {
+function delete($detail_fields, &$delete_items) {    
+    global $wpdb;
+    $delete_key = "delete_data";
+    foreach($detail_fields as $key=>$value) {
+        foreach($value as $arr) {            
+            if (!array_key_exists($delete_key, $arr)) continue;
+            $arr_opt = $arr[$delete_key];
+            $closure = $arr_opt['closure'];
+            $sql = $closure($delete_items, $_REQUEST['id']);
+            if (strlen($sql) > 0) {
+                $wpdb->query($sql);
+                // if ($wpdb->last_error !== '') {
+                //     CoreUtils::log($delete_items, "Error Del-->");
+                //     CoreUtils::log($sql, "Error SQL-->");
+                // } else {
+                //     CoreUtils::log($sql, "SQL-->");
+                // }
+            }
+        }
+    }
+}
+
+function save_or_update(&$table, &$table_name, &$item, &$detail, &$delete_items) {
     $result = null;
-    // saving new item    
+    // saving new item
     if (!array_key_exists('id', $item) 
         || $item['id'] == 0) {
         $sql_command = SQLCommand::Insert;
         $result = insert_item($table_name, $item);
     } else { // updating item
-        $delete_key = "delete_data";
-        foreach($table->get_detail_fields() as $key=>$detail_fields) {
-            foreach($detail_fields as $fields) {
-                if (!array_key_exists($delete_key, $fields)) {
-                    continue;
-                }
-                $detail_table_name = $fields[$delete_key]['table_name'];
-                $closure = $fields[$delete_key]['closure'];
-                if (!array_key_exists($key, $detail)) {
-                    continue;
-                }
-                foreach($detail[$key] as $str) {
-                    if (is_callable($closure)) {
-                        $data = $closure(explode_items($str), $item);
-                        $data['user_id'] = get_current_user_id();
-                        delete_all($detail_table_name, $data);
-                    }
-                }
-            }
-        }
+        //if (isset($delete_items)) {
+            delete($table->get_detail_fields(), $delete_items);
+        //}
         $sql_command = SQLCommand::Update;
         $result = update_item($table, $table_name, $item);                
     }
-    if (sizeof($detail) > 0) {
+    if (isset($detail) > 0) {
         save_sub_item($table, $table_name, $detail, $item);
-    }
+    }        
     return $result;
 }
 
@@ -208,7 +225,9 @@ function post(&$table, &$table_name, &$item) {
     $result = null;
     $sql_command = SQLCommand::None;    
     $item = shortcode_atts($table->get_defaults(), $_REQUEST);
+    // CoreUtils::log($item, "[post - $table_name - item] ");
     $detail = get_detail_table($item);
+    $delete_items = get_delete_command($_REQUEST);
     $validate_result = $table->validate($item);
     $success = true;
     if (sizeof($validate_result) > 0) {
@@ -221,8 +240,9 @@ function post(&$table, &$table_name, &$item) {
         global $wpdb;
         $result = array();
         $wpdb->query("START TRANSACTION");
-        $result = save_or_update($table, $table_name, $item, $detail);
+        $result = save_or_update($table, $table_name, $item, $detail, $delete_items);
         if ($wpdb->last_error !== '') {
+            // CoreUtils::log($wpdb->last_error, "[post - roolback - $table_name] ");
             $wpdb->query("ROLLBACK");
         } else {
             $wpdb->query("COMMIT");
@@ -265,6 +285,7 @@ function create_form_handler(&$table) {
     global $wpdb;
     $table_name = Settings::_self()->get_prefix() . $table->project_settings['id'];
     $item = [];
+    // CoreUtils::log($_REQUEST, "[create_form_handler - $table_name - REQUEST]");
     if (isset($_REQUEST['nonce']) 
     && wp_verify_nonce($_REQUEST['nonce'], basename(__FILE__))) {  
         $result = post($table, $table_name, $item);

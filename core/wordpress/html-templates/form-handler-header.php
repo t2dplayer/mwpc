@@ -8,7 +8,10 @@
     </h2>
     %notice
     %message
-    <form id="form" method="POST">
+    <form id="mwpc-form" method="POST">
+        <div id="mwpc-delete-commands">
+            <div></div>
+        </div>
         <input type="hidden" name="nonce" value="%nonce"/>
         <input type="hidden" name="id" value="%id"/>
         <div class="metabox-holder" id="poststuff">

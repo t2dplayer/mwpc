@@ -37,11 +37,10 @@ class Project extends TableBase {
         );
         $this->push_detail_field('researchline', 
             FormDetailUtils::DeleteData('mwpc_project_has_researchline', 
-                function($arr, &$item) {
-                    $result['project_id']=$item['id'];
-                    return $result;
+                function($arr, $item_id) {
+                    return "DELETE FROM mwpc_project_has_researchline WHERE project_id = $item_id;" ;
                 }
-            )            
+            , true)
         );
     }
     protected function make_student() {
@@ -75,17 +74,39 @@ class Project extends TableBase {
         );
         $this->push_detail_field('student', 
             FormDetailUtils::DeleteData('mwpc_student',
-                function($arr, &$item){
-                    $result['id']=$arr['id'];
-                    return $result;
+                function($arr, $item_id) {
+                    // delete_where'=>'DELETE FROM %tablename WHERE %attr;',
+                    if (sizeof($arr) == 0
+                    || !array_key_exists("delete_student", $arr)) return "";
+                    $attr = SQLTemplates::make_where_attr(
+                        $arr, 
+                        "delete_student", 
+                        "id"
+                    );
+                    $sql = SQLTemplates::_self()->get('delete_where', [
+                        '%tablename'=>"mwpc_student",
+                        '%attr'=>$attr,
+                    ]);
+                    return $sql;
                 }
             )
         );
         $this->push_detail_field('student', 
             FormDetailUtils::DeleteData('mwpc_project_has_student',
-                function($arr, &$item){
-                    $result['project_id']=$item['id'];
-                    return $result;
+                function($arr, $item_id) {
+                    if (sizeof($arr) == 0
+                        || !array_key_exists("delete_student", $arr)) return "";
+                    // delete_where'=>'DELETE FROM %tablename WHERE %attr;',
+                    $attr = SQLTemplates::make_where_attr(
+                        $arr, 
+                        "delete_student", 
+                        "project_id"
+                    );
+                    $sql = SQLTemplates::_self()->get('delete_where', [
+                        '%tablename'=>"mwpc_project_has_student",
+                        '%attr'=>$attr,
+                    ]);
+                    return $sql;
                 }
             )
         );
@@ -116,13 +137,23 @@ class Project extends TableBase {
                 'project' // foreign key in detail table
             ))
         );
-        $this->push_detail_field('publishing', 
-            FormDetailUtils::DeleteData('mwpc_project_has_publishing',
-                function($arr, &$item){
-                    $result['id']=$arr['id'];
-                    return $result;
-                }
-            )
+        $this->push_detail_field('publising', 
+            FormDetailUtils::DeleteData('mwpc_project_has_publishing', 
+                function($arr, $item_id) {
+                    if (sizeof($arr) == 0
+                    || !array_key_exists("delete_publishing", $arr)) return "";
+                    // delete_where'=>'DELETE FROM %tablename WHERE %attr;',
+                    $attr = SQLTemplates::make_where_attr(
+                        $arr, 
+                        "delete_publishing", 
+                        "id"
+                    );
+                    $sql = SQLTemplates::_self()->get('delete_where', [
+                        '%tablename'=>"mwpc_project_has_publishing",
+                        '%attr'=>$attr,
+                    ]);
+                    return $sql;
+                })
         );
     }
     function __construct($table_name) {

@@ -267,7 +267,7 @@ class FormUtils {
         return $columns;
     }
     private static function MakeRows(&$get_results, $checkboxid) {
-        $rows = "";
+        $rows = '<div id="mwpc-delete-row-'. $checkboxid . '"><div></div></div>';
         if (is_iterable($get_results)) {
             foreach($get_results as $row) {
                 $rows .= '<tr id="mwpc-detail-row-'. $checkboxid . '-' . $row['id'] . '">';

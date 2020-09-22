@@ -34,5 +34,16 @@ class SQLTemplates {
             '%database'=>Settings::_self()->get_database_name(),
             '%table'=>Settings::_self()->get_prefix() . $table_name,
         ]);
-    }    
+    }
+    public static function make_where_attr($arr, $key, $field) {
+        if (!array_key_exists($key, $arr)) return "";
+        $attr = "user_id = " . get_current_user_id() . " AND ";
+        $counter = 0;
+        $size = sizeof($arr[$key]);
+        foreach($arr[$key] as $id) {
+            $attr .= "$field = " . $id;
+            if ($counter++ < $size - 1) $attr .= " OR ";
+        }
+        return $attr;
+    }
 }

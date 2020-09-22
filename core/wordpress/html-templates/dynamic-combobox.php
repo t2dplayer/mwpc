@@ -61,8 +61,7 @@
                     str_delete = `
                     <script>
                     jQuery(document).ready(function ($) {
-                        $("#mwpc-delete-` + itemid + `").click(function() {
-                            console.log(this.getAttribute('itemid'));
+                        $("#mwpc-delete-` + itemid + `").click(function() {                            
                             $("#mwpc-detail-unsaved-row-%id-` + this.getAttribute("itemid") + `").remove();
                         });
                     });
