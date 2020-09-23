@@ -41,6 +41,7 @@ class HTMLTemplates {
             'js_table',
             'th_hidden',
             'delete_button',
+            'input_form_field',
         ];
         foreach($keys as $k) {
             $filename = str_replace("_", "-", $k) . ".php";
