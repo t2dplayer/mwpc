@@ -51,7 +51,7 @@ class Student extends TableBase {
             '',
             mwpc_make_user_select_field(),
             FormUtils::Input('text', 'Digite o nome aqui'),
-            FormUtils::Input('text', 'Digite um CPF válido aqui', '', 14),
+            FormUtils::Input('text', 'Digite um CPF válido aqui (somente números)', '', 14),
             FormUtils::Input('email', 'Digite um E-mail válido aqui', ''),
             FormUtils::SelectFromArray(['enum'=>Student::$types, 'selected_key'=>'type']),
             FormUtils::Input('text', 'Digite o nome da tese/dissertação aqui', '', 512),
