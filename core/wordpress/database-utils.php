@@ -29,7 +29,7 @@ class DatabaseUtils {
         $results = $wpdb->get_results($sql);
         $str = "";
         foreach ($results as $r) {
-            $str .= '&#9642;<em>'. $r->name .'</em></br>';
+            $str .= '&#9642;<em>'. esc_attr($r->name) .'</em></br>';
         }
         return $str;
     }
@@ -55,11 +55,11 @@ class DatabaseUtils {
                 $str .= '&#9642;';
                 $str .= TemplateUtils::t($url, [
                     '%itemid'=>$r->id, 
-                    '%content'=>$r->name
+                    '%content'=>esc_attr($r->name)
                 ]);
                 $str .= '</br>';
             } else {
-                $str .= '&#9642;<em>'. $r->name .'</em></br>';
+                $str .= '&#9642;<em>'. esc_attr($r->name) .'</em></br>';
             }
         }
         return $str;
@@ -71,7 +71,7 @@ class DatabaseUtils {
         $results = $wpdb->get_results($sql);
         $str = "";
         foreach ($results as $r) {
-            $str .= '&#9642;<em>'. $r->$output_field .'</em></br>';
+            $str .= '&#9642;<em>'. esc_attr($r->$output_field) .'</em></br>';
         }
         return $str;
     }    

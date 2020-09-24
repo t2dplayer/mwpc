@@ -47,11 +47,11 @@ class Project extends TableBase {
         $this->push_detail_field('student', 
             FormDetailUtils::InsertData('mwpc_student',
                 function($arr, &$item){
-                    $result['name']=$arr['name'];
-                    $result['cpf']=$arr['cpf'];
-                    $result['email']=$arr['email'];
-                    $result['thesis_name']=$arr['thesis_name'];
-                    $result['type']=$arr['type'];
+                    $result['name']=esc_attr($arr['name']);
+                    $result['cpf']=esc_attr($arr['cpf']);
+                    $result['email']=esc_attr($arr['email']);
+                    $result['thesis_name']=esc_attr($arr['thesis_name']);
+                    $result['type']=esc_attr($arr['type']);
                     return $result;
                 }
             )
@@ -59,8 +59,8 @@ class Project extends TableBase {
         $this->push_detail_field('student', 
             FormDetailUtils::InsertData('mwpc_project_has_student',
                 function($arr, &$item){
-                    $result['project_id']=$item['id'];
-                    $result['student_id']=$item['student_id'];
+                    $result['project_id']=esc_attr($item['id']);
+                    $result['student_id']=esc_attr($item['student_id']);
                     return $result;
                 }
             )
@@ -115,17 +115,17 @@ class Project extends TableBase {
         $this->push_detail_field('publishing', 
             FormDetailUtils::InsertData('mwpc_project_has_publishing',
                 function($arr, &$item){                    
-                    $result['doi']=$arr['doi'];
-                    $result['name']=$arr['name'];
-                    $result['year']=$arr['year'];
+                    $result['doi']=esc_attr($arr['doi']);
+                    $result['name']=esc_attr($arr['name']);
+                    $result['year']=esc_attr($arr['year']);
                     if (array_key_exists('project_type', $arr)) {
-                        $result['project_type']=$arr['project_type'];
+                        $result['project_type']=esc_attr($arr['project_type']);
                         if ($result['project_type'] != 'collaboration') {
-                            $result['project_id']=$item['id'];
+                            $result['project_id']=esc_attr($item['id']);
                         }
                     }
-                    $result['publishing_type']=$arr['publishing_type'];
-                    $result['note']=$arr['note'];
+                    $result['publishing_type']=esc_attr($arr['publishing_type']);
+                    $result['note']=esc_attr($arr['note']);
                     return $result;
                 }
             )
@@ -160,7 +160,7 @@ class Project extends TableBase {
         parent::__construct(array(
             'singular' => 'student',
             'plural' => 'students',
-        ), $table_name, Role::ADMIN);
+        ), $table_name);
         $this->configure('Lista de Projetos',
                          'Projetos');
         $this->fields = [
@@ -186,13 +186,7 @@ class Project extends TableBase {
         ]);
         $this->fields_types = CoreUtils::merge($this->fields, [
             '',//id
-            FormUtils::SelectFromTable([//user_id
-                'sql'=>SQLTemplates::_self()->get('select_all', [
-                    '%fields'=>'id as value, display_name as label',
-                    '%tablename'=>'wp_users',
-                ]),
-                'selected_key'=>'id',
-            ]),
+            mwpc_make_user_select_field(),
             FormUtils::Input('text', 'Digite o título do projeto aqui'),//name
             FormUtils::SelectFromArray(['enum'=>$this->types, 'selected_key'=>'status']),//status
             FormUtils::TableMultiSelect([
@@ -282,7 +276,7 @@ class Project extends TableBase {
         ]);
         $this->labels = CoreUtils::merge($this->fields, [
             MWPCLocale::get('id'),
-            "Professor Responsável",
+            "Docente Responsável",
             "Nome do Projeto",
             "Status",
             "Linhas de Pesquisa",

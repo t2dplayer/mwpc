@@ -10,8 +10,8 @@ class SQLTemplates {
     protected static $sql_map = [
         'bulk_delete'=>'DELETE FROM %tablename WHERE id IN(%ids);',
         'select_count'=>'SELECT COUNT(id) FROM %tablename;',
-        'select_prepare_user'=>'SELECT * FROM %tablename ORDER BY %orderby %order LIMIT %d OFFSET %d;',
-        'select_prepare_adm'=>'SELECT * FROM %tablename WHERE user_id = %userid ORDER BY %orderby %order LIMIT %d OFFSET %d;',
+        'select_prepare_user'=>'SELECT * FROM %tablename WHERE user_id = %userid ORDER BY %orderby %order LIMIT %d OFFSET %d;',        
+        'select_prepare_adm'=>'SELECT * FROM %tablename ORDER BY %orderby %order LIMIT %d OFFSET %d;',
         'select_where_id'=>'SELECT * FROM %tablename WHERE id = %d;',
         'select_all'=>'SELECT %fields FROM %tablename;',
         'full_table_name'=>'`%database`.`%table`',

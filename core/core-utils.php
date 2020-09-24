@@ -58,7 +58,7 @@ class CoreUtils {
         for($i = 0; $i < strlen($string); ++$i) {
             $mask[strpos($mask,"#")] = $string[$i];
         }
-        return $mask;
+        return str_replace("#", "", $mask);
     }
     public static function clean($string) {
         return preg_replace('/[#;]/', '', $string);

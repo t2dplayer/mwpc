@@ -17,6 +17,7 @@ function mwpc_deactivate_plugin_name()
 // Register our de-activation hook
 register_deactivation_hook(__FILE__, 'mwpc_deactivate_plugin_name');
 
+
 function mwpc_user_contactmethods($methods, $user)
 {
     $methods['CPF'] = 'CPF';
@@ -52,8 +53,8 @@ function mwpc_admin_menu_rename()
     if ($user->roles[0] == 'administrator') {
         global $menu;
         global $submenu;
-        $menu[70][0] = 'Professores';
-        $submenu['users.php'][5][0] = 'Lista de professores';
+        $menu[70][0] = 'Docentes';
+        $submenu['users.php'][5][0] = 'Lista de docentes';
     }
 }
 add_action('admin_menu', 'mwpc_admin_menu_rename');

@@ -28,11 +28,17 @@ function your_project_objects() {
     ]);
 }
 
+// function get_display_name($user_id) {
+//     if (!$user = get_userdata($user_id))
+//         return false;
+//     return $user->data->display_name;
+// }
+
 /* Now we need to create the menu items */
 function mwpc_plugin_admin_menu_install()
 {
     your_project_objects();
-    if (is_admin()) {
+    if (current_user_can('administrator')) {
         mwpc_make_admin_menu_items(Settings::_self()->get_objects());
     } else {
         mwpc_remove_admin_menu();

@@ -76,11 +76,11 @@ class TableBase extends WP_List_Table {
             '%orderby'=>(isset($_REQUEST['orderby']) && in_array($_REQUEST['orderby'], array_keys($this->get_sortable_columns()))) ? $_REQUEST['orderby'] : array_key_first($sortable),
             '%order'=>(isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc'))) ? $_REQUEST['order'] : 'asc'
         ];
-        if (!is_admin()) {
-            $sql_select = SQLTemplates::get('select_prepare_user', $data);
-        } else {
+        if (!current_user_can('administrator')) {
             $user = wp_get_current_user();
             $data['%userid']=$user->ID;
+            $sql_select = SQLTemplates::get('select_prepare_user', $data);
+        } else {
             $sql_select = SQLTemplates::get('select_prepare_adm', $data);
         }
         $prepared_sql = $wpdb->prepare($sql_select, $per_page, $paged);
@@ -102,12 +102,12 @@ class TableBase extends WP_List_Table {
             ]), 
         );
         return sprintf('%s %s',
-            $item['name'],
+            esc_attr($item['name']),
             $this->row_actions($actions)
         );
     }    
     public function column_default($item, $column_name) {
-        return $item[$column_name];
+        return esc_attr($item[$column_name]);
     }
     public function column_cb($item) {
         $html = HTMLTemplates::_self()->get('input_checkbox', [

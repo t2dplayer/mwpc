@@ -43,9 +43,9 @@ class Student extends TableBase {
         $this->push_detail_field('paper', 
             FormDetailUtils::InsertData('mwpc_student_has_paper',
                 function($arr, &$item){
-                    $result['student_id']=$item['id'];
-                    $result['name']=$arr['name'];
-                    $result['year']=$arr['year'];
+                    $result['student_id']=esc_attr($item['id']);
+                    $result['name']=esc_attr($arr['name']);
+                    $result['year']=esc_attr($arr['year']);
                     return $result;
                 }
             )

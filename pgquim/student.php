@@ -24,7 +24,7 @@ class Student extends TableBase {
         parent::__construct(array(
             'singular' => 'student',
             'plural' => 'students',
-        ), $table_name, Role::ADMIN);
+        ), $table_name);
         $this->configure('Lista de Colaboradores',
                          'Colaboradores');
         $this->fields = [
@@ -45,15 +45,11 @@ class Student extends TableBase {
             'graduate',
             '',
         ]);
+
+
         $this->fields_types = CoreUtils::merge($this->fields, [
             '',
-            FormUtils::SelectFromTable([
-                'sql'=>SQLTemplates::_self()->get('select_all', [
-                    '%fields'=>'id as value, display_name as label',
-                    '%tablename'=>'wp_users',
-                ]),
-                'selected_key'=>'id',
-            ]),
+            mwpc_make_user_select_field(),
             FormUtils::Input('text', 'Digite o nome aqui'),
             FormUtils::Input('text', 'Digite um CPF válido aqui', '', 14),
             FormUtils::Input('email', 'Digite um E-mail válido aqui', ''),

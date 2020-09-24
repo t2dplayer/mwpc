@@ -11,6 +11,28 @@ foreach($files as $f) {
     require_once WP_PLUGIN_DIR . '/mwpc/core/' . $f;
 }
 
+function pgquim_make_project_select_field($table_name) {
+    if (current_user_can('administrator')) {
+        return FormUtils::SelectFromTable([
+            'sql'=>SQLTemplates::_self()->get('select_all', [
+                '%fields'=>'id as value, name as label',
+                '%tablename'=>SQLTemplates::full_table_name($table_name),
+            ]),
+            'selected_key'=>'project_id',
+            ], true);
+    } else {
+        //'SELECT %fields FROM %tablename WHERE %where;'
+        return FormUtils::SelectFromTable([
+            'sql'=>SQLTemplates::_self()->get('select_fields_where', [
+                '%fields'=>'id as value, name as label',
+                '%tablename'=>SQLTemplates::full_table_name($table_name),
+                '%where'=>'user_id = ' . get_current_user_id(),
+            ]),
+            'selected_key'=>'project_id',
+            ]);
+    }
+}
+
 class Publishing extends TableBase {
     static public $project_type = array(
         'project'=>'Projeto', 
@@ -24,7 +46,7 @@ class Publishing extends TableBase {
         parent::__construct(array(
             'singular' => 'publishing',
             'plural' => 'publishings',
-        ), $table_name, Role::ADMIN);
+        ), $table_name);
         $this->configure('Lista de Publicações/Patentes',
                          'Publicações e Patentes');
         $this->fields = [
@@ -51,20 +73,8 @@ class Publishing extends TableBase {
         ]);
         $this->fields_types = CoreUtils::merge($this->fields, [
             '',
-            FormUtils::SelectFromTable([
-                'sql'=>SQLTemplates::_self()->get('select_all', [
-                    '%fields'=>'id as value, display_name as label',
-                    '%tablename'=>'wp_users',
-                ]),
-                'selected_key'=>'id',
-                ]),
-            FormUtils::SelectFromTable([
-                'sql'=>SQLTemplates::_self()->get('select_all', [
-                    '%fields'=>'id as value, name as label',
-                    '%tablename'=>SQLTemplates::full_table_name('project'),
-                ]),
-                'selected_key'=>'project_id',
-                ], true),            
+            mwpc_make_user_select_field(),
+            pgquim_make_project_select_field('project'),            
             FormUtils::Input('text', 'Digite o DOI aqui', '', 512),
             FormUtils::Input('text', 'Digite o título do trabalho aqui', 'required', 512),
             FormUtils::Input('number', 'Digite o ano da publicação do trabalho aqui', 'required'),
@@ -117,7 +127,7 @@ class Publishing extends TableBase {
         $url = HTMLTemplates::_self()->get('edit_link_row', [
             '%formid'=>'project_form_id',
             '%itemid'=>$result[0]->id,
-            '%content'=>$result[0]->name
+            '%content'=>esc_attr($result[0]->name)
         ]);
         return $url;
     }
@@ -130,5 +140,8 @@ class Publishing extends TableBase {
         if (!array_key_exists('publishing_type', $item)
             || !isset($item['publishing_type'])) return "-";
         return Publishing::$publishing_type[$item['publishing_type']];
+    }
+    public function column_note($item) {
+        return esc_attr($item['note']);
     }
 };

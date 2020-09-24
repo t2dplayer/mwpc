@@ -4,7 +4,7 @@ class MWPCLocale {
     public static $message_map = [
         'deleted_records'=>'Registros apagados: %d',
         'add_new'=>"Adicionar novo",
-        'teacher'=>"Professor",
+        'teacher'=>"Docente",
         'name'=>'Nome',
         'cpf'=>'CPF',
         'email'=>'E-mail',

@@ -7,6 +7,8 @@
 <script>
     jQuery(document).ready(function ($) {
         $("#mwpc-plus-%id").click(function() {
+            if ($("#mwpc-plus-%id").attr("disabled") === "disabled") return false;
+            $("#mwpc-plus-%id").attr("disabled", true);
             if (typeof mwpc_counter_%id == 'undefined') {
                 mwpc_counter_%id = 0;
             }
@@ -15,10 +17,10 @@
             %ifelse
             $("#mwpc-cancel-%id").click(function() {
                 $('#mwpc-item-%id-' + this.getAttribute("itemid")).remove();
+                $("#mwpc-plus-%id").attr("disabled", false);
             });
             $("#mwpc-save-%id").click(function(){
                 let validated = true;
-                // let objects = $('tbody#mwpc-detail-body-%id tr td input');
                 let arr_objects = [
                     $('tbody#mwpc-detail-body-%id tr td input'),
                     $('tbody#mwpc-detail-body-%id tr td select'),
@@ -70,6 +72,7 @@
                     $("#mwpc-table-%id tr:last").after(row);
                     $("#mwpc-table-%id").after(str_delete);
                     $('#mwpc-item-%id-' + this.getAttribute("itemid")).remove();
+                    $("#mwpc-plus-%id").attr("disabled", false);
                 }
             });             
         });
