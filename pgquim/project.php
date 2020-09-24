@@ -52,6 +52,7 @@ class Project extends TableBase {
                     $result['email']=esc_attr($arr['email']);
                     $result['thesis_name']=esc_attr($arr['thesis_name']);
                     $result['type']=esc_attr($arr['type']);
+                    CoreUtils::log($result, " [insert data - mwpc_student] ");
                     return $result;
                 }
             )
@@ -60,7 +61,15 @@ class Project extends TableBase {
             FormDetailUtils::InsertData('mwpc_project_has_student',
                 function($arr, &$item){
                     $result['project_id']=esc_attr($item['id']);
-                    $result['student_id']=esc_attr($item['student_id']);
+                    if (array_key_exists("student_id_array", $item)) {
+                        $student_id = array_shift($item['student_id_array']);
+                        if ($student_id != null) {
+                            $result['student_id']=esc_attr($student_id);
+                        }
+                    } else {
+                        $result['student_id']=esc_attr($item['student_id']);
+                    }
+                    CoreUtils::log($result, " [insert data - mwpc_project_has_student] ");
                     return $result;
                 }
             )

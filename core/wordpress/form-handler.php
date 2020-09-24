@@ -166,12 +166,21 @@ function save_sub_item(&$table, &$table_name, &$detail, &$item) {
             foreach($detail[$key] as $str) {
                 if (is_callable($closure)) {
                     $exploded = explode_items($str);
+                    CoreUtils::log($exploded, " [exploded] ");
                     if (array_key_exists('id', $exploded)
                         && isset($exploded['id'])) continue;
+                    CoreUtils::log($item, " [ item before ] ");
                     $data = $closure($exploded, $item);
                     $data['user_id'] = get_current_user_id();
+                    CoreUtils::log($data, " [data] ");
                     $r_id = insert_item($detail_table_name, $data);
                     $item[$key."_id"] = $r_id['id'];
+                    if (array_key_exists($key."_id_array", $item)) {
+                        array_push($item[$key."_id_array"], $r_id['id']);
+                    } else {
+                        $item[$key."_id_array"] = [$r_id['id']];
+                    }
+                    CoreUtils::log($item, " [ item after ] ");
                 }
             }
         }
@@ -215,6 +224,7 @@ function save_or_update(&$table, &$table_name, &$item, &$detail, &$delete_items)
         $result = update_item($table, $table_name, $item);                
     }
     if (isset($detail) > 0) {
+        // CoreUtils::log($detail, " [save_or_update] ");
         save_sub_item($table, $table_name, $detail, $item);
     }        
     return $result;
@@ -225,7 +235,6 @@ function post(&$table, &$table_name, &$item) {
     $result = null;
     $sql_command = SQLCommand::None;    
     $item = shortcode_atts($table->get_defaults(), $_REQUEST);
-    // CoreUtils::log($item, "[post - $table_name - item] ");
     $detail = get_detail_table($item);
     $delete_items = get_delete_command($_REQUEST);
     $validate_result = $table->validate($item);
@@ -242,7 +251,6 @@ function post(&$table, &$table_name, &$item) {
         $wpdb->query("START TRANSACTION");
         $result = save_or_update($table, $table_name, $item, $detail, $delete_items);
         if ($wpdb->last_error !== '') {
-            // CoreUtils::log($wpdb->last_error, "[post - roolback - $table_name] ");
             $wpdb->query("ROLLBACK");
         } else {
             $wpdb->query("COMMIT");
@@ -285,7 +293,6 @@ function create_form_handler(&$table) {
     global $wpdb;
     $table_name = Settings::_self()->get_prefix() . $table->project_settings['id'];
     $item = [];
-    // CoreUtils::log($_REQUEST, "[create_form_handler - $table_name - REQUEST]");
     if (isset($_REQUEST['nonce']) 
     && wp_verify_nonce($_REQUEST['nonce'], basename(__FILE__))) {  
         $result = post($table, $table_name, $item);
