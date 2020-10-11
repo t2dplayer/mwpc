@@ -97,12 +97,13 @@ class Student extends TableBase {
             '',
             '',
         ]);
+        global $wpdb;
         $this->fields_types = CoreUtils::merge($this->fields, [
             '',
             FormUtils::SelectFromTable([
                 'sql'=>SQLTemplates::_self()->get('select_all', [
                     '%fields'=>'id as value, display_name as label',
-                    '%tablename'=>'wp_users',
+                    '%tablename'=>$wpdb->prefix . 'users',
                 ]),
                 'selected_key'=>'id',
             ]),

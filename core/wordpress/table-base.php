@@ -175,7 +175,7 @@ class TableBase extends WP_List_Table {
     public function column_user_id($item) {
         global $wpdb;
         $sql = SQLTemplates::_self()->get('select_where_id', [
-            '%tablename'=> 'wp_users',
+            '%tablename'=> $wpdb->prefix . 'users',
         ]);
         $items = $wpdb->get_row($wpdb->prepare($sql, $item['user_id']), ARRAY_A);
         return '<em>' . $items['display_name'] . '</em>';

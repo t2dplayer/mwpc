@@ -10,7 +10,7 @@ foreach($files as $f) {
     require_once WP_PLUGIN_DIR . '/mwpc/core/' . $f;
 }
 
-class Skill extends TableBase {
+class Skill extends TableBase {    
     function __construct($table_name) {
         parent::__construct(array(
             'singular' => 'skill',
@@ -24,12 +24,13 @@ class Skill extends TableBase {
             get_current_user_id(), 
             '',
         ]);
+        global $wpdb;
         $this->fields_types = CoreUtils::merge($this->fields, [
             '',
             FormUtils::SelectFromTable([
                 'sql'=>SQLTemplates::_self()->get('select_all', [
                     '%fields'=>'id as value, display_name as label',
-                    '%tablename'=>'wp_users',
+                    '%tablename'=>$wpdb->prefix . 'users',
                 ]),
                 'selected_key'=>'id',
             ]),

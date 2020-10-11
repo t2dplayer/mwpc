@@ -8,11 +8,12 @@ require_once 'project-has-student.php';
 require_once 'publishing.php';
 
 function mwpc_make_user_select_field() {
+    global $wpdb;
     if (current_user_can('administrator')) {
         return FormUtils::SelectFromTable([
             'sql'=>SQLTemplates::_self()->get('select_all', [
                 '%fields'=>'id as value, display_name as label',
-                '%tablename'=>'wp_users',
+                '%tablename'=>$wpdb->prefix . 'users',
             ]),
             'selected_key'=>'id',
         ]);
