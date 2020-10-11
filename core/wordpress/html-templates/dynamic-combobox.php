@@ -58,12 +58,12 @@
                             row += '<td>' + objects[i].value + '</td>';
                         }
                     }
-                    row += '<td><div id="mwpc-delete-' + itemid + '" itemid="' + itemid + '" class="button action">Apagar</div></td>';
+                    row += '<td><div id="mwpc-delete-%id-' + itemid + '" itemid="' + itemid + '" class="button action">Apagar</div></td>';
                     row += "</tr>";
                     str_delete = `
                     <script>
                     jQuery(document).ready(function ($) {
-                        $("#mwpc-delete-` + itemid + `").click(function() {                            
+                        $("#mwpc-delete-%id-` + itemid + `").click(function() {                            
                             $("#mwpc-detail-unsaved-row-%id-` + this.getAttribute("itemid") + `").remove();
                         });
                     });
