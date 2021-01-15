@@ -13,12 +13,12 @@ foreach($files as $f) {
 
 class Student extends TableBase {
     static public $types = array(
-        'egress'=>'Egresso', 
-        'coautor'=>'Co-Autor', 
-        'graduate'=>'Graduação', 
+        //'egress'=>'Egresso', 
+        //'coautor'=>'Co-Autor', 
+        //'graduate'=>'Graduação', 
         'mastering'=>'Mestrado', 
         'phd'=>'Doutorado',
-        'external'=>'Colaborador Externo',
+        //'external'=>'Colaborador Externo',
     );
     function __construct($table_name) {
         parent::__construct(array(
@@ -33,7 +33,7 @@ class Student extends TableBase {
             'name', 
             'cpf', 
             'email', 
-            'type',
+            'thesis_type',
             'thesis_name', 
         ];
         $this->defaults = CoreUtils::merge($this->fields, [
@@ -62,8 +62,8 @@ class Student extends TableBase {
             MWPCLocale::get('name'),
             MWPCLocale::get('cpf'),
             MWPCLocale::get('email'),
-            MWPCLocale::get('type'),
-            "Título da Tese/Dissertação",
+            "Nível",
+            "Trabalho de Conclusão",
         ]);
         $this->is_sortable = CoreUtils::merge($this->fields,[
             false, false, true, false, false, true, false
@@ -78,7 +78,7 @@ class Student extends TableBase {
             `cpf` VARCHAR(255) NULL,
             `email` VARCHAR(255) NULL,
             `thesis_name` VARCHAR(512) NULL,
-            `type` ENUM('egress', 'coautor', 'graduate', 'mastering', 'phd', 'external') DEFAULT 'external',
+            `thesis_type` ENUM('mastering', 'phd') DEFAULT 'mastering',
             KEY(`cpf`),
             PRIMARY KEY  (`id`))
           ENGINE = InnoDB;";
@@ -98,8 +98,8 @@ class Student extends TableBase {
             ],            
         ];
     }
-    public function column_type($item) {
-        return Student::$types[$item['type']];
+    public function column_thesis_type($item) {
+        return Student::$types[$item['thesis_type']];
     }
     public function column_cpf($item) {
         if (!array_key_exists('cpf', $item)) return '-';

@@ -51,8 +51,8 @@ class Project extends TableBase {
                     $result['cpf']=esc_attr($arr['cpf']);
                     $result['email']=esc_attr($arr['email']);
                     $result['thesis_name']=esc_attr($arr['thesis_name']);
-                    $result['type']=esc_attr($arr['type']);
-                    CoreUtils::log($result, " [insert data - mwpc_student] ");
+                    $result['thesis_type']=esc_attr($arr['thesis_type']);
+                    //CoreUtils::log($result, " [insert data - mwpc_student] ");
                     return $result;
                 }
             )
@@ -69,7 +69,7 @@ class Project extends TableBase {
                     } else {
                         $result['student_id']=esc_attr($item['student_id']);
                     }
-                    CoreUtils::log($result, " [insert data - mwpc_project_has_student] ");
+                    //CoreUtils::log($result, " [insert data - mwpc_project_has_student] ");
                     return $result;
                 }
             )
@@ -206,12 +206,12 @@ class Project extends TableBase {
                 'data_sql'=>FormUtils::DataSQLPrepareJoinDetailFields('student', 
                     'project_has_student', 
                     'project',
-                    ['id', 'name', 'email',  'cpf', 'thesis_name', 'type']
+                    ['id', 'name', 'email',  'cpf', 'thesis_name', 'thesis_type']
                 ),
                 'foreign_key'=>'project_id',
                 'table_name'=>'project_has_student',
                 'checkbox_id'=>'student',
-                'fields'=>['id', 'name', 'email',  'cpf', 'thesis_name', 'type'],
+                'fields'=>['id', 'name', 'email',  'cpf', 'thesis_name', 'thesis_type'],
                 'combobox'=>[
                     FormUtils::ComboboxItem(
                         'Discente', 
@@ -221,7 +221,7 @@ class Project extends TableBase {
                             'email'=>'email',
                             'cpf'=>'text',
                             'thesis_name'=>'text',
-                            'type'=>[
+                            'thesis_type'=>[
                                 'type'=>'select',
                                 'enum'=>Student::$types
                             ]
@@ -290,7 +290,7 @@ class Project extends TableBase {
             "Status",
             "Linhas de Pesquisa",
             "Equipe",
-            "Artigos ou Patentes"
+            "Produção"
         ]);
         $this->is_sortable = CoreUtils::merge($this->fields,[
             false, false, true, false, false, false, false

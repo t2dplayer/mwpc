@@ -13,12 +13,12 @@ foreach($files as $f) {
 
 class Student extends TableBase {
     static public $types = array(
-        'egress'=>'Egresso', 
-        'coautor'=>'Co-Autor', 
-        'graduate'=>'Graduação', 
+        //'egress'=>'Egresso', 
+        //'coautor'=>'Co-Autor', 
+        //'graduate'=>'Graduação', 
         'mastering'=>'Mestrado', 
         'phd'=>'Doutorado',
-        'external'=>'Colaborador Externo',
+        //'external'=>'Colaborador Externo',
     );
     protected function make_skill() {
         $skill_closure = function($arr, &$item) {
@@ -111,7 +111,7 @@ class Student extends TableBase {
             FormUtils::Input('text', 'Digite um CPF válido aqui (somente números)', '', 14),
             FormUtils::Input('email', 'Digite um E-mail válido aqui', ''),
             FormUtils::SelectFromArray(['enum'=>Student::$types, 'selected_key'=>'type']),
-            FormUtils::Input('text', 'Digite o nome da tese/dissertação aqui', '', 512),
+            FormUtils::Input('text', 'Digite o título do trabalho de conclusão aqui', '', 512),
             FormUtils::TableMultiSelect([
                 'table_name'=>'skill',
                 'fields'=>['id', 'name'],
@@ -141,8 +141,8 @@ class Student extends TableBase {
             MWPCLocale::get('name'),
             MWPCLocale::get('cpf'),
             MWPCLocale::get('email'),
-            MWPCLocale::get('type'),
-            "Título da Tese/Dissertação",
+            "Nível",
+            "Trabalho de Conclusão",
             "Habilidades",
             "Artigos",
         ]);
